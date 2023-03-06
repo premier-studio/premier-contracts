@@ -35,9 +35,9 @@ describe('Drop', () => {
     describe('construction', () => {
         let dropId = 0;
 
-        for (let maxSupply of [0, 200, 100000]) {
-            for (let price of [toEth('0.05'), toEth('0.25'), toEth('2.5')]) {
-                for (let versions of [1, 5, 10]) {
+        for (const maxSupply of [0, 200, 100000]) {
+            for (const price of [toEth('0.05'), toEth('0.25'), toEth('2.5')]) {
+                for (const versions of [1, 5, 10]) {
                     context(`with maxSupply: ${maxSupply}, price: ${price}, versions: ${versions}`, () => {
                         beforeEach(async () => {
                             Drop = await Contracts.Drop.deploy(dropId, maxSupply, price, versions);
@@ -237,10 +237,10 @@ describe('Drop', () => {
             });
         };
 
-        let id = 0;
-        for (let maxSupply of [3, 5]) {
-            for (let price of [toEth('0'), toEth('0.05'), toEth('2.5')]) {
-                for (let versions of [1, 5]) {
+        const id = 0;
+        for (const maxSupply of [3, 5]) {
+            for (const price of [toEth('0'), toEth('0.05'), toEth('2.5')]) {
+                for (const versions of [1, 5]) {
                     context(`with id: ${id}, price: ${price}, maxSupply: ${maxSupply}`, () => {
                         before(async () => {
                             Drop = await Contracts.Drop.deploy(id, maxSupply, price, versions);
@@ -274,9 +274,7 @@ describe('Drop', () => {
         });
     });
 
-    // @TODO
-
-    describe.only('mutating', () => {
+    describe('mutating', () => {
         let tokenMutating: TestERC721;
 
         beforeEach(async () => {
@@ -327,7 +325,9 @@ describe('Drop', () => {
             });
         });
 
-        describe('custom token', () => {});
+        // @TODO
+
+        // describe('custom token', () => {});
 
         // describe('mutation interfaces', () => {
         //     context('CryptoPunks', () => {

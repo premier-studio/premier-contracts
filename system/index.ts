@@ -1,3 +1,5 @@
+/* eslint-disable max-len */
+
 export const ListMockTokens: {
     [name: string]: { contract: string; owner: string; tokens: { [tokenId: number]: string } };
 } = {

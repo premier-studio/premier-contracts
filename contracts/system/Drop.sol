@@ -9,7 +9,7 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
-import { ITokenInterface } from "./tokens/ITokenInterface.sol";
+import { ITokenInterface } from "../tokens/ITokenInterface.sol";
 
 /**
  * @dev A struct representing the status of a Drip.
@@ -43,39 +43,39 @@ struct Drip {
  * @title Drop
  */
 contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
-    string constant _name = "DROP#";
-    string constant _symbol = "DROP#";
+    string public constant NAME_PREFIX = "DROP#";
+    string public constant SYMBOL_PREFIX = "DROP#";
 
     // Contract's URI
-    string CONTRACT_URI = "";
+    string public CONTRACT_URI = "";
 
     // Drop's URI
-    string DROP_URI = "";
+    string public DROP_URI = "";
 
     // Drips's base URI
-    string BASE_DRIP_URI = "";
+    string public BASE_DRIP_URI = "";
 
     // Immutables
 
     // The id of the DROP
-    uint256 immutable DROP_ID;
+    uint256 public immutable DROP_ID;
 
     // The maximum supply of the DROP
-    uint256 immutable MAX_SUPPLY;
+    uint256 public immutable MAX_SUPPLY;
 
     // The price to mint the Drip
-    uint256 immutable PRICE;
+    uint256 public immutable PRICE;
 
     // The number of versions
-    uint256 immutable VERSIONS; // starts at version 1, cannot be 0
+    uint256 public immutable VERSIONS; // starts at version 1, cannot be 0
 
     // Mappings
 
     // Mapping from drip id to Drip
-    mapping(uint256 => Drip) dripIdToDrip;
+    mapping(uint256 => Drip) public dripIdToDrip;
 
     // Mapping from a token contract address to ITokenInterface
-    mapping(address => ITokenInterface) tokenAddressToInterface;
+    mapping(address => ITokenInterface) public tokenAddressToInterface;
 
     // Events
 
@@ -107,7 +107,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
         uint256 _maxSupply,
         uint256 _price,
         uint256 _versions
-    ) ERC721(string.concat(_name, Strings.toString(id)), string.concat(_symbol, Strings.toString(id))) {
+    ) ERC721(string.concat(NAME_PREFIX, Strings.toString(id)), string.concat(SYMBOL_PREFIX, Strings.toString(id))) {
         if (_versions == 0) {
             revert InvalidVersions();
         }

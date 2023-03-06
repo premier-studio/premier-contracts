@@ -37,7 +37,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         return dropContract;
     };
 
-    let dropContract = await getContract(DROP_ID);
+    const dropContract = await getContract(DROP_ID);
     const address = await publishDropMetadataToIPFS(DROP_ID);
     await dropContract.setDropURI(address);
 };
