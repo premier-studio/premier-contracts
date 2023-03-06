@@ -1,4 +1,8 @@
+/* eslint-disable indent */
+
 import 'tsconfig-paths/register';
+
+import process from 'process';
 
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-etherscan';
@@ -8,41 +12,46 @@ import '@typechain/hardhat';
 import 'hardhat-deploy';
 
 import { HardhatUserConfig } from 'hardhat/config';
-import process from 'process';
 import { forkConfig } from './hardhat.fork.config';
-
-const env = process.env as any;
 
 // Paths
 const DEFAULT_DEPLOY_DIR = './deploy/_default/';
 const DEFAULT_SETUP_TEST_DIR = './deploy/_setup/';
 
-// Networks
-const MAINNET = 'MAINNET';
-const GOERLI = 'GOERLI';
+interface EnvOptions {
+    HARDHAT_DEPLOYER?: string;
+    HARDHAT_USER?: string;
+    ETHERSCAN_API?: string;
+    MAINNET_ENDPOINT?: string;
+    GOERLI_ENDPOINT?: string;
+}
 
-// Users
-const HARDHAT_DEPLOYER = 'HARDHAT_DEPLOYER';
-const HARDHAT_USER = 'HARDHAT_USER';
-
-// Secret API
-const ETHERSCAN_API = 'ETHERSCAN_API';
+const {
+    HARDHAT_DEPLOYER = '',
+    HARDHAT_USER = '',
+    ETHERSCAN_API = '',
+    MAINNET_ENDPOINT = '',
+    GOERLI_ENDPOINT = ''
+}: EnvOptions = process.env as any as EnvOptions;
 
 const config: HardhatUserConfig = {
     networks: {
         hardhat: {
             forking: forkConfig,
             chainId: 1337,
-            accounts: [
-                {
-                    privateKey: env[HARDHAT_DEPLOYER], // deployer
-                    balance: '10000000000000000000000000000000000000000000000'
-                },
-                {
-                    privateKey: env[HARDHAT_USER], // user
-                    balance: '10000000000000000000000000000000000000000000000'
-                }
-            ],
+            accounts:
+                HARDHAT_DEPLOYER && HARDHAT_USER
+                    ? [
+                          {
+                              privateKey: HARDHAT_DEPLOYER, // deployer
+                              balance: '10000000000000000000000000000000000000000000000'
+                          },
+                          {
+                              privateKey: HARDHAT_USER, // user
+                              balance: '10000000000000000000000000000000000000000000000'
+                          }
+                      ]
+                    : undefined,
             allowUnlimitedContractSize: true,
             deploy: [DEFAULT_DEPLOY_DIR, DEFAULT_SETUP_TEST_DIR]
         },
@@ -50,20 +59,20 @@ const config: HardhatUserConfig = {
             deploy: [DEFAULT_DEPLOY_DIR]
         },
         mainnet: {
-            url: env[MAINNET],
+            url: MAINNET_ENDPOINT,
             deploy: [DEFAULT_DEPLOY_DIR, './deploy/mainnet']
         },
         goerli: {
-            url: env[GOERLI],
+            url: GOERLI_ENDPOINT,
             chainId: 5,
             deploy: [DEFAULT_DEPLOY_DIR, './deploy/goerli'],
-            accounts: [env[HARDHAT_DEPLOYER]],
+            accounts: HARDHAT_DEPLOYER ? [HARDHAT_DEPLOYER] : undefined,
             gasPrice: 10000000 // 0.01 Gwei
         }
     },
 
     etherscan: {
-        apiKey: env[ETHERSCAN_API]
+        apiKey: ETHERSCAN_API
     },
 
     namedAccounts: {
