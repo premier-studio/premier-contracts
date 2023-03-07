@@ -7,7 +7,7 @@
     "files": [],
     "scripts": {
         "start": "FORK=MAINNET FORK_BN=16226501 yarn hardhat node",
-        "build": "hardhat compile && yarn tsc -p tsconfig.build.json",
+        "build": "yarn clean && hardhat compile && yarn tsc -p tsconfig.build.json",
         "deploy": "hardhat deploy",
         "clean": "rm -rf dist artifacts cache typechain",
         "test": "hardhat test",

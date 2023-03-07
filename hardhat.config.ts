@@ -1,7 +1,5 @@
 /* eslint-disable indent */
 
-import 'tsconfig-paths/register';
-
 import process from 'process';
 
 import '@nomiclabs/hardhat-ethers';
@@ -10,6 +8,8 @@ import '@nomiclabs/hardhat-waffle';
 import '@typechain/hardhat';
 
 import 'hardhat-deploy';
+
+import 'tsconfig-paths/register';
 
 import { HardhatUserConfig } from 'hardhat/config';
 import { forkConfig } from './hardhat.fork.config';

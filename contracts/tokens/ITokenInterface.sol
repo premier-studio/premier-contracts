@@ -8,8 +8,4 @@ pragma solidity 0.8.14;
  */
 interface ITokenInterface {
     function ownerOf(uint256) external returns (address);
-
-    function name() external view returns (string memory);
-
-    function symbol() external view returns (string memory);
 }

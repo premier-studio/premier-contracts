@@ -92,11 +92,13 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
 
     error AlreadyMutated();
 
+    error InvalidMaxSupply();
     error InvalidVersions();
     error InvalidVersionId();
     error InvalidDripId();
     error InvalidPrice();
-    error InvalidOwner();
+    error InvalidDripOwner();
+    error InvalidTokenOwner();
 
     error MaxSupplyReached();
 
@@ -108,6 +110,10 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
         uint256 _price,
         uint256 _versions
     ) ERC721(string.concat(NAME_PREFIX, Strings.toString(id)), string.concat(SYMBOL_PREFIX, Strings.toString(id))) {
+        if (_maxSupply == 0) {
+            revert InvalidMaxSupply();
+        }
+
         if (_versions == 0) {
             revert InvalidVersions();
         }
@@ -266,7 +272,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     /**
      * @dev Mutate a Drip.
      */
-    function mutate(uint256 dripId, IERC721 token, uint256 tokenId) external nonReentrant {
+    function mutate(uint256 dripId, IERC721 tokenContract, uint256 tokenId) external nonReentrant {
         Drip storage _drip = dripIdToDrip[dripId];
 
         // Drip to be mutated should exist
@@ -274,9 +280,9 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
             revert InvalidDripId();
         }
 
-        // Drip owner should be the tx sender
-        if (this.ownerOf(dripId) != msg.sender) {
-            revert InvalidOwner();
+        // Drip owner should be the msg.sender
+        if (_ownerOf(dripId) != msg.sender) {
+            revert InvalidDripOwner();
         }
 
         // Drip status should be Default
@@ -284,27 +290,44 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
             revert AlreadyMutated();
         }
 
-        // If the token mutating support IERC721 we need to check the given contract or
-        // else, we need to check its interface
-        if (IERC165(address(token)).supportsInterface(type(IERC721).interfaceId)) {
-            if (token.ownerOf(tokenId) != msg.sender) {
-                revert InvalidOwner();
-            }
-        } else {
-            // If the token contract interface has been registered, use it, if not revert
-            ITokenInterface tokenInterface = getTokenContractInterface(address(token));
-
-            if (address(tokenInterface) == address(0)) {
-                if (tokenInterface.ownerOf(tokenId) != msg.sender) {
-                    revert InvalidOwner();
+        // check if tokenContract support IERC721 interface
+        try IERC165(address(tokenContract)).supportsInterface(type(IERC721).interfaceId) returns (bool doesSupport) {
+            if (doesSupport) {
+                // if it does, call ownerOf like a regular ERC721 contract
+                try tokenContract.ownerOf(tokenId) returns (address tokenOwner) {
+                    // if owner of tokenId is not msg.sender
+                    if (tokenOwner != msg.sender) {
+                        revert InvalidTokenOwner();
+                    }
+                    // else, all good
+                } catch {
+                    // if this code is reached it means that ownerOf threw "ERC721: invalid token ID"
+                    revert InvalidTokenOwner();
                 }
             } else {
+                // if this code is reached it means that the contract implement the supportsInterface
+                // function but doesn't support ERC721, so most likely an ERC20 contract or such
                 revert UnsupportedTokenContract();
             }
+        } catch {
+            // if this code is reached it means that tokenContract is a custom contract,
+            // so let's check if we have it stored in our contract interface system
+            ITokenInterface tokenInterface = getTokenContractInterface(address(tokenContract));
+
+            // there is no support for this contract yet
+            if (address(tokenInterface) == address(0)) {
+                revert UnsupportedTokenContract();
+            }
+
+            if (tokenInterface.ownerOf(tokenId) != msg.sender) {
+                revert InvalidTokenOwner();
+            }
+
+            // all good
         }
 
         _drip.status = DripStatus.MUTATED;
-        _drip.mutation.tokenContract = address(token);
+        _drip.mutation.tokenContract = address(tokenContract);
         _drip.mutation.tokenId = tokenId;
 
         emit Mutated(dripId);

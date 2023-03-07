@@ -64,7 +64,7 @@ describe('Store', () => {
         };
 
         let dropId = 0;
-        for (const maxSupply of [0, 5, 100]) {
+        for (const maxSupply of [1, 5, 100]) {
             for (const price of [toEth('0.05'), toEth('0.25'), toEth('2.5')]) {
                 for (const versions of [1, 5, 10]) {
                     context(`with maxSupply: ${maxSupply}, price: ${price}`, () => {

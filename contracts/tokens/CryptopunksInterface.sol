@@ -16,10 +16,6 @@ import { ITokenInterface } from "./ITokenInterface.sol";
  */
 interface ICryptopunks {
     function punkIndexToAddress(uint256 tokenId) external returns (address);
-
-    function name() external view returns (string memory);
-
-    function symbol() external view returns (string memory);
 }
 
 /**
@@ -36,13 +32,5 @@ contract CryptopunksInterface is ITokenInterface {
 
     function ownerOf(uint256 tokenId) public returns (address) {
         return TOKEN.punkIndexToAddress(tokenId);
-    }
-
-    function name() public view returns (string memory) {
-        return TOKEN.name();
-    }
-
-    function symbol() public view returns (string memory) {
-        return TOKEN.symbol();
     }
 }

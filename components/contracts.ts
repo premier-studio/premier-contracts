@@ -7,7 +7,10 @@ import {
     Store__factory,
     ERC721__factory,
     CryptoPunksMarket__factory,
-    CryptopunksInterface__factory
+    CryptopunksInterface__factory,
+    TestTokenInterface__factory,
+    UnusualNFT__factory,
+    TestERC20__factory
 } from '../typechain';
 
 const { deployOrAttach, attach } = initDeployOrAttach(ethers);
@@ -20,9 +23,11 @@ export default buildContracts((signer?: Signer) => {
         CryptoPunksMarket: deployOrAttach(CryptoPunksMarket__factory, signer),
         CryptopunksInterface: deployOrAttach(CryptopunksInterface__factory, signer),
         //
-        //
-        //
         ERC721: deployOrAttach(ERC721__factory, signer),
-        TestERC721: deployOrAttach(TestERC721__factory, signer)
+        //
+        TestERC721: deployOrAttach(TestERC721__factory, signer),
+        TestERC20: deployOrAttach(TestERC20__factory, signer),
+        TestTokenInterface: deployOrAttach(TestTokenInterface__factory, signer),
+        UnusualNFT: deployOrAttach(UnusualNFT__factory, signer)
     };
 });
