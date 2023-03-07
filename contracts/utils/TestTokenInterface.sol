@@ -3,11 +3,11 @@ pragma solidity 0.8.14;
 
 import { ITokenInterface } from "../tokens/ITokenInterface.sol";
 
-interface IUnusualNFT {
+interface ICustomNFT {
     function myFakeOwnerOf(uint256 tokenId) external returns (address);
 }
 
-contract UnusualNFT is IUnusualNFT {
+contract CustomNFT is ICustomNFT {
     mapping(uint256 => address) tokenIdToOwner;
 
     constructor() {}
@@ -21,14 +21,14 @@ contract UnusualNFT is IUnusualNFT {
     }
 }
 
-contract TestTokenInterface is ITokenInterface {
-    IUnusualNFT immutable TOKEN;
+contract CustomTokenInterface is ITokenInterface {
+    CustomNFT immutable TOKEN;
 
-    constructor(IUnusualNFT token) {
+    constructor(CustomNFT token) {
         TOKEN = token;
     }
 
-    function ownerOf(uint256 tokenId) public returns (address) {
+    function ownerOf(uint256 tokenId) public view returns (address) {
         return TOKEN.myFakeOwnerOf(tokenId);
     }
 }

@@ -187,8 +187,8 @@ describe('Drop', () => {
         let testInterface: TestTokenInterface;
 
         beforeEach(async () => {
-            testToken = await Contracts.ERC721.deploy('SYMBOL', 'NAME');
-            testInterface = await Contracts.TestTokenInterface.deploy(testToken.address);
+            testToken = await Contracts.TestERC721.deploy();
+            testInterface = await Contracts.CustomTokenInterface.deploy(testToken.address);
         });
 
         it('initial token contract interface should be nil', async () => {
@@ -423,7 +423,7 @@ describe('Drop', () => {
             let unsualNFT: UnusualNFT;
 
             beforeEach(async () => {
-                unsualNFT = await Contracts.UnusualNFT.deploy();
+                unsualNFT = await Contracts.CustomNFT.deploy();
             });
 
             it("should revert if contract interface hasn't been registered", async () => {
@@ -432,7 +432,7 @@ describe('Drop', () => {
             });
 
             it("should revert if user doesn't own the nft", async () => {
-                testTokenInterface = await Contracts.TestTokenInterface.deploy(unsualNFT.address);
+                testTokenInterface = await Contracts.CustomTokenInterface.deploy(unsualNFT.address);
 
                 await Drop.connect(owner).setTokenContractInterface(unsualNFT.address, testTokenInterface.address);
 
@@ -441,7 +441,7 @@ describe('Drop', () => {
             });
 
             it('should mutate', async () => {
-                testTokenInterface = await Contracts.TestTokenInterface.deploy(unsualNFT.address);
+                testTokenInterface = await Contracts.CustomTokenInterface.deploy(unsualNFT.address);
                 await unsualNFT.setOwner(0, user.address);
 
                 await Drop.connect(owner).setTokenContractInterface(unsualNFT.address, testTokenInterface.address);
