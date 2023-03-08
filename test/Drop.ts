@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { BigNumber, ContractReceipt, ContractTransaction } from 'ethers';
+import { BigNumber, ContractTransaction } from 'ethers';
 import { ethers } from 'hardhat';
 
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
@@ -7,12 +7,12 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import Contracts from '@premier-contracts/components/contracts';
 import {
     CryptoPunksMarket,
+    CustomNFT,
+    CustomTokenInterface,
     Drop,
     ERC721,
     TestERC20,
-    TestERC721,
-    TestTokenInterface,
-    UnusualNFT
+    TestERC721
 } from '@premier-contracts/typechain';
 import { DripStatus } from '@premier-contracts/types';
 
@@ -184,7 +184,7 @@ describe('Drop', () => {
 
     context('contract interface', () => {
         let testToken: ERC721;
-        let testInterface: TestTokenInterface;
+        let testInterface: CustomTokenInterface;
 
         beforeEach(async () => {
             testToken = await Contracts.TestERC721.deploy();
@@ -419,35 +419,35 @@ describe('Drop', () => {
         });
 
         describe('custom token', () => {
-            let testTokenInterface: TestTokenInterface;
-            let unsualNFT: UnusualNFT;
+            let customTokenInterface: CustomTokenInterface;
+            let customNFT: CustomNFT;
 
             beforeEach(async () => {
-                unsualNFT = await Contracts.CustomNFT.deploy();
+                customNFT = await Contracts.CustomNFT.deploy();
             });
 
             it("should revert if contract interface hasn't been registered", async () => {
                 await Drop.mint(DEFAULT_DRIP_VERSION);
-                await expect(Drop.mutate(0, unsualNFT.address, 0)).to.revertedWith(UnsupportedTokenContract);
+                await expect(Drop.mutate(0, customNFT.address, 0)).to.revertedWith(UnsupportedTokenContract);
             });
 
             it("should revert if user doesn't own the nft", async () => {
-                testTokenInterface = await Contracts.CustomTokenInterface.deploy(unsualNFT.address);
+                customTokenInterface = await Contracts.CustomTokenInterface.deploy(customNFT.address);
 
-                await Drop.connect(owner).setTokenContractInterface(unsualNFT.address, testTokenInterface.address);
+                await Drop.connect(owner).setTokenContractInterface(customNFT.address, customTokenInterface.address);
 
                 await Drop.mint(DEFAULT_DRIP_VERSION);
-                await expect(Drop.mutate(0, unsualNFT.address, 0)).to.revertedWith(InvalidTokenOwner);
+                await expect(Drop.mutate(0, customNFT.address, 0)).to.revertedWith(InvalidTokenOwner);
             });
 
             it('should mutate', async () => {
-                testTokenInterface = await Contracts.CustomTokenInterface.deploy(unsualNFT.address);
-                await unsualNFT.setOwner(0, user.address);
+                customTokenInterface = await Contracts.CustomTokenInterface.deploy(customNFT.address);
+                await customNFT.setOwner(0, user.address);
 
-                await Drop.connect(owner).setTokenContractInterface(unsualNFT.address, testTokenInterface.address);
+                await Drop.connect(owner).setTokenContractInterface(customNFT.address, customTokenInterface.address);
 
                 await Drop.mint(DEFAULT_DRIP_VERSION);
-                Drop.mutate(0, unsualNFT.address, 0);
+                Drop.mutate(0, customNFT.address, 0);
             });
         });
 

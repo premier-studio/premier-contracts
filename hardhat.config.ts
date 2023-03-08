@@ -1,24 +1,34 @@
 /* eslint-disable indent */
+import 'dotenv/config';
+import 'tsconfig-paths/register';
 
 import process from 'process';
 
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-etherscan';
 import '@nomiclabs/hardhat-waffle';
+
 import '@typechain/hardhat';
 
 import 'hardhat-deploy';
 
-import 'tsconfig-paths/register';
-
 import { HardhatUserConfig } from 'hardhat/config';
-import { forkConfig } from './hardhat.fork.config';
+import { HardhatNetworkForkingUserConfig } from 'hardhat/types';
 
 // Paths
 const DEFAULT_DEPLOY_DIR = './deploy/_default/';
 const DEFAULT_SETUP_TEST_DIR = './deploy/_setup/';
 
+enum Networks {
+    MAINNET = 'MAINNET',
+    GOERLI = 'GOERLI',
+    //
+    NONE = 'NONE'
+}
+
 interface EnvOptions {
+    FORK?: Networks;
+    FORK_BN?: string;
     HARDHAT_DEPLOYER?: string;
     HARDHAT_USER?: string;
     ETHERSCAN_API?: string;
@@ -27,12 +37,21 @@ interface EnvOptions {
 }
 
 const {
+    FORK = Networks.NONE,
+    FORK_BN = '',
     HARDHAT_DEPLOYER = '',
     HARDHAT_USER = '',
     ETHERSCAN_API = '',
     MAINNET_ENDPOINT = '',
     GOERLI_ENDPOINT = ''
 }: EnvOptions = process.env as any as EnvOptions;
+
+const forkConfig: HardhatNetworkForkingUserConfig | undefined = (() => {
+    if (FORK === undefined || FORK === Networks.NONE) return undefined;
+    const url = FORK === Networks.MAINNET ? MAINNET_ENDPOINT : FORK === Networks.GOERLI ? GOERLI_ENDPOINT : '';
+    console.log('Forking network [', FORK, '], block number [', FORK_BN, ']');
+    return { url, blockNumber: Number(FORK_BN) };
+})();
 
 const config: HardhatUserConfig = {
     networks: {
