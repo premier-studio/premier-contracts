@@ -1,6 +1,6 @@
 # Premier
 
-> Premier is about creating a world that is not only technologically advanced, but also socially conscious. We are firm believers that by integrating cutting-edge technology with the world's resources, we can not only improve the lives of individuals but also contribute to the greater good. We are committed to working tirelessly to ensure that we leave a positive impact on the world.
+> It is all about creating a world that is not only technologically advanced, but also socially conscious. We are firm believers that by integrating cutting-edge technology with the world's resources, we can not only improve the lives of individuals but also contribute to the greater good. We are committed to working tirelessly to ensure that we leave a positive impact on the world.
 
 ## Introduction
 
