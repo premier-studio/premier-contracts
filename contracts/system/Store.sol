@@ -13,7 +13,7 @@ import { Drop } from "./Drop.sol";
  */
 contract Store is Ownable {
     // Total supply of DROPs
-    uint256 TOTAL_SUPPLY = 0;
+    uint256 private TOTAL_SUPPLY = 0;
 
     // Mappings
 
@@ -26,25 +26,25 @@ contract Store is Ownable {
     event DropCreated(uint256 indexed dropId);
 
     /**
-     * @dev Returns the current supply
+     * @dev Returns the current supply.
      */
     function totalSupply() public view returns (uint256) {
         return TOTAL_SUPPLY;
     }
 
     /**
-     * @dev Returns the DROP item matching the drop id
+     * @dev Returns the DROP item matching the drop id.
      */
     function drop(uint256 dropId) public view returns (Drop) {
         return dropIdToDrop[dropId];
     }
 
     /**
-     * @dev Create a DROP
+     * @dev Create a DROP.
      */
     function createDrop(uint256 maxSupply, uint256 mintPrice, uint8 versions) public onlyOwner {
-        uint256 dropId = TOTAL_SUPPLY;
-        dropIdToDrop[dropId] = new Drop(dropId, maxSupply, mintPrice, versions);
+        uint256 dropId = totalSupply();
+        dropIdToDrop[dropId] = new Drop(dropId, maxSupply, mintPrice, versions, msg.sender);
         TOTAL_SUPPLY++;
 
         emit DropCreated(dropId);

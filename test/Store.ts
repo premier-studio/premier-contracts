@@ -9,6 +9,10 @@ import { Store } from '@premier-contracts/typechain';
 
 const { parseEther: toEth } = ethers.utils;
 
+const DEFAULT_DROP_MAX_SUPPLY = 1;
+const DEFAULT_DROP_PRICE = toEth('0');
+const DEFAULT_DROP_VERSIONS = 1;
+
 describe('Store', () => {
     let owner: SignerWithAddress, user: SignerWithAddress;
 
@@ -60,6 +64,7 @@ describe('Store', () => {
                 expect(await drop.price()).to.equal(price);
                 expect(await drop.versions()).to.equal(versions);
                 expect(await drop.dropId()).to.equal(dropId);
+                expect(await drop.owner()).to.equal(owner.address);
             });
         };
 
@@ -74,5 +79,11 @@ describe('Store', () => {
                 }
             }
         }
+
+        it('should revert when not allowed to create a drop', async () => {
+            await expect(
+                Store.connect(user).createDrop(DEFAULT_DROP_MAX_SUPPLY, DEFAULT_DROP_PRICE, DEFAULT_DROP_VERSIONS)
+            ).to.revertedWith('Ownable: caller is not the owner');
+        });
     });
 });

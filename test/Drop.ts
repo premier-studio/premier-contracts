@@ -51,19 +51,20 @@ const DEFAULT_URI = 'https://google.com';
 const INVALID_DROP_VERSIONS = 0;
 const INVALID_DROP_MAX_SUPPLY = 0;
 
-const deployDrop = async (obj?: { dropId?: number; maxSupply?: number; price?: BigNumber; versions?: number }) => {
-    return await Contracts.Drop.deploy(
-        obj?.dropId ?? DEFAULT_DROP_ID,
-        obj?.maxSupply ?? DEFAULT_DROP_MAX_SUPPLY,
-        obj?.price ?? DEFAULT_DROP_PRICE,
-        obj?.versions ?? DEFAULT_DROP_VERSIONS
-    );
-};
-
 describe('Drop', () => {
     let owner: SignerWithAddress, user: SignerWithAddress;
 
     let Drop: Drop;
+
+    const deployDrop = async (obj?: { dropId?: number; maxSupply?: number; price?: BigNumber; versions?: number }) => {
+        return await Contracts.Drop.deploy(
+            obj?.dropId ?? DEFAULT_DROP_ID,
+            obj?.maxSupply ?? DEFAULT_DROP_MAX_SUPPLY,
+            obj?.price ?? DEFAULT_DROP_PRICE,
+            obj?.versions ?? DEFAULT_DROP_VERSIONS,
+            owner.address
+        );
+    };
 
     before(async () => {
         [owner, user] = await ethers.getSigners();
@@ -111,7 +112,8 @@ describe('Drop', () => {
                     DEFAULT_DROP_ID,
                     INVALID_DROP_MAX_SUPPLY,
                     DEFAULT_DROP_PRICE,
-                    DEFAULT_DROP_VERSIONS
+                    DEFAULT_DROP_VERSIONS,
+                    owner.address
                 )
             ).revertedWith(InvalidMaxSupply);
         });
@@ -122,7 +124,8 @@ describe('Drop', () => {
                     DEFAULT_DROP_ID,
                     DEFAULT_DROP_MAX_SUPPLY,
                     DEFAULT_DROP_PRICE,
-                    INVALID_DROP_VERSIONS
+                    INVALID_DROP_VERSIONS,
+                    owner.address
                 )
             ).revertedWith(InvalidVersions);
         });

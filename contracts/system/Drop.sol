@@ -31,7 +31,7 @@ struct DripMutation {
  * @dev A struct representing a Drip.
  */
 struct Drip {
-    uint256 version;
+    uint8 version;
     //
     DripStatus status;
     DripMutation mutation;
@@ -108,7 +108,8 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
         uint256 id,
         uint256 _maxSupply,
         uint256 _price,
-        uint256 _versions
+        uint256 _versions,
+        address _owner
     ) ERC721(string.concat(NAME_PREFIX, Strings.toString(id)), string.concat(SYMBOL_PREFIX, Strings.toString(id))) {
         if (_maxSupply == 0) {
             revert InvalidMaxSupply();
@@ -123,7 +124,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
         PRICE = _price;
         VERSIONS = _versions;
 
-        transferOwnership(tx.origin);
+        transferOwnership(_owner);
     }
 
     /**
@@ -241,7 +242,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     /**
      * @dev Mint a Drip.
      */
-    function mint(uint256 versionId) external payable {
+    function mint(uint8 versionId) external payable nonReentrant {
         uint256 dripId = totalSupply();
 
         // Token id to be minted needs to be below the max supply limit
