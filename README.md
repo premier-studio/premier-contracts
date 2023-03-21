@@ -20,7 +20,7 @@ Mint price will vary depending of the object underlying the Drip.
 
 Upon minting, it can be possible to chose some specific parameters beforehand. You could call that a pre-customization. If for instance a Drip would be a skateboard deck, then you could for instance change its colors and/or textures and such things. All of those, unrelated to any NFT or mutation process.
 
-#### Mutating
+#### **Mutating**
 
 The mutation process is straightforward. The only thing you have to do is to have the NFT with which you want to customize your **Drip**.
 
