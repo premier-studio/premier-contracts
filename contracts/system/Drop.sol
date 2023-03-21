@@ -293,15 +293,15 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
         // check if tokenContract support IERC721 interface
         try IERC165(address(tokenContract)).supportsInterface(type(IERC721).interfaceId) returns (bool doesSupport) {
             if (doesSupport) {
-                // if it does, call ownerOf like a regular ERC721 contract
+                // if it does support it, let's call ownerOf like any regular ERC721 contract
                 try tokenContract.ownerOf(tokenId) returns (address tokenOwner) {
-                    // if owner of tokenId is not msg.sender
+                    // if owner of tokenId is not msg.sender, reverts
                     if (tokenOwner != msg.sender) {
                         revert InvalidTokenOwner();
                     }
-                    // else, all good
+                    // else, all good, it's the owner
                 } catch {
-                    // if this code is reached it means that ownerOf threw "ERC721: invalid token ID"
+                    // if this code is reached it means that ownerOf threw (most likely "ERC721: invalid token ID" but it could technically be something else)
                     revert InvalidTokenOwner();
                 }
             } else {

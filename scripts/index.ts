@@ -28,7 +28,7 @@ const generateDropMetadata = async (dropId: number): Promise<DropMetadata> => {
     // Upload each versions
     const versions: any[] = [];
     const files = await fs.readdir(dropVersionsDir);
-    for (let index = 0; index < files.length / 3; index++) {
+    for (let index = 0; index < files.length / 2; index++) {
         const infoFile = path.join(dropVersionsDir, index + '.info.json');
         const textureFileName = path.join(dropVersionsDir, index + '.texture.png');
 

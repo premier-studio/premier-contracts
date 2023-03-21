@@ -4,11 +4,10 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import Contracts from '@premier-contracts/components/contracts';
 
-import { ListMockTokens } from '../../system';
+import { ListMockTokens } from '@premier-contracts/mock';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-    const { deployments, getNamedAccounts } = hre;
-    const { deploy, deterministic } = deployments;
+    const { getNamedAccounts } = hre;
 
     const { user } = await getNamedAccounts();
     const userSigner = await ethers.getSigner(user);

@@ -6,7 +6,7 @@ import Contracts from '@premier-contracts/components/contracts';
 import { STORE } from '@premier-contracts/deploy/_default/000_deploy_store';
 import { publishDropMetadataToIPFS } from '@premier-contracts/scripts';
 
-const { parseEther: toEth, formatBytes32String } = ethers.utils;
+const { parseEther: toEth } = ethers.utils;
 
 const DROP_ID = 0;
 
@@ -25,7 +25,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             autoMine: true
         },
         'createDrop',
-        100,
+        500,
         toEth('0.1'),
         5
     );
