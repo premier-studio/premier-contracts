@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
-pragma solidity 0.8.14;
+pragma solidity 0.8.19;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -67,7 +67,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     uint256 public immutable PRICE;
 
     // The number of versions
-    uint256 public immutable VERSIONS; // starts at version 1, cannot be 0
+    uint8 public immutable VERSIONS; // starts at version 1, cannot be 0
 
     // Mappings
 
@@ -108,7 +108,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
         uint256 id,
         uint256 _maxSupply,
         uint256 _price,
-        uint256 _versions,
+        uint8 _versions,
         address _owner
     ) ERC721(string.concat(NAME_PREFIX, Strings.toString(id)), string.concat(SYMBOL_PREFIX, Strings.toString(id))) {
         if (_maxSupply == 0) {
@@ -151,7 +151,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     /**
      * @dev Returns the versions of the mint.
      */
-    function versions() public view returns (uint256) {
+    function versions() public view returns (uint8) {
         return VERSIONS;
     }
 
