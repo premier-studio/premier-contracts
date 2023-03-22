@@ -31,9 +31,11 @@ struct DripMutation {
  * @dev A struct representing a Drip.
  */
 struct Drip {
+    // metadata
     uint8 version;
-    //
+    // status
     DripStatus status;
+    // mutation
     DripMutation mutation;
 }
 
@@ -86,7 +88,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     event Mutated(uint256 indexed dripId);
 
     // Event triggered when funds are withdrawn
-    event Withdrawn(uint256 indexed funds);
+    event Withdrawn(uint256 funds);
 
     // Errors
 
