@@ -3,4 +3,6 @@ import type * as mock from './mock';
 import type * as types from './types';
 import type * as typechain from './typechain';
 
-export type { system, mock, types, typechain };
+import type { contracts } from './components/contracts';
+
+export type { system, mock, types, typechain, contracts };

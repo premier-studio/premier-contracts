@@ -32,3 +32,6 @@ yarn-error.log*
 /data
 /deployments/localhost
 /typechain
+
+.yalc
+yalc.lock

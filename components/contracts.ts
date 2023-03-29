@@ -1,6 +1,7 @@
-import { Signer } from '@ethersproject/abstract-signer';
+/* eslint-disable camelcase */
+
+import { buildContracts } from 'ethers-deploy-or-attach';
 import { ethers } from 'hardhat';
-import { initDeployOrAttach, buildContracts } from 'ethers-deploy-or-attach';
 import {
     TestERC721__factory,
     Drop__factory,
@@ -12,20 +13,16 @@ import {
     TestERC20__factory
 } from '../typechain';
 
-const { deployOrAttach } = initDeployOrAttach(ethers);
+export const contracts = {
+    CustomNFT: CustomNFT__factory,
+    CustomTokenInterface: CustomTokenInterface__factory,
+    TestERC20: TestERC20__factory,
+    TestERC721: TestERC721__factory,
+    Drop: Drop__factory,
+    Store: Store__factory,
+    CryptoPunksMarket: CryptoPunksMarket__factory,
+    CryptopunksInterface: CryptopunksInterface__factory
+};
 
-export default buildContracts((signer?: Signer) => {
-    return {
-        Drop: deployOrAttach(Drop__factory, signer),
-        Store: deployOrAttach(Store__factory, signer),
-        //
-        CryptoPunksMarket: deployOrAttach(CryptoPunksMarket__factory, signer),
-        CryptopunksInterface: deployOrAttach(CryptopunksInterface__factory, signer),
-        //
-        TestERC721: deployOrAttach(TestERC721__factory, signer),
-        TestERC20: deployOrAttach(TestERC20__factory, signer),
-        //
-        CustomNFT: deployOrAttach(CustomNFT__factory, signer),
-        CustomTokenInterface: deployOrAttach(CustomTokenInterface__factory, signer)
-    };
-});
+const builtContracts = buildContracts(contracts, ethers);
+export default builtContracts;

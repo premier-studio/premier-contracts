@@ -68,8 +68,6 @@ describe('Drop', () => {
 
     before(async () => {
         [owner, user] = await ethers.getSigners();
-
-        Drop = await deployDrop();
     });
 
     describe('construction', () => {
