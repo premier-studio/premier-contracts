@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-
 import { buildContracts } from 'ethers-deploy-or-attach';
 
 import { ethers } from 'hardhat';
