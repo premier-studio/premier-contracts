@@ -4,8 +4,8 @@ import { ethers } from 'hardhat';
 
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
-import Contracts from '@premier-contracts/components/contracts';
-import { Store } from '@premier-contracts/typechain';
+import Contracts from '@premier-components/contracts';
+import { Store } from '@premier-typechain';
 
 const { parseEther: toEth } = ethers.utils;
 

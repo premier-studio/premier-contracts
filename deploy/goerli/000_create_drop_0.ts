@@ -2,11 +2,11 @@ import { ethers } from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import Contracts from '@premier-contracts/components/contracts';
-import { STORE } from '@premier-contracts/deploy/_default/000_deploy_store';
-import { publishDropMetadataToIPFS } from '@premier-contracts/scripts';
+import Contracts from '@premier-components/contracts';
+import { STORE } from '@premier-deploy/_default/000_deploy_store';
+import { publishDropMetadataToIPFS } from '@premier-scripts';
 
-const { parseEther: toEth, formatBytes32String } = ethers.utils;
+const { parseEther: toEth } = ethers.utils;
 
 const DROP_ID = 0;
 

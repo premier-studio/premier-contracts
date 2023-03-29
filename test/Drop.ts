@@ -4,7 +4,7 @@ import { ethers } from 'hardhat';
 
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
-import Contracts from '@premier-contracts/components/contracts';
+import Contracts from '@premier-components/contracts';
 import {
     CryptoPunksMarket,
     CustomNFT,
@@ -13,8 +13,8 @@ import {
     ERC721,
     TestERC20,
     TestERC721
-} from '@premier-contracts/typechain';
-import { DripStatus } from '@premier-contracts/types';
+} from '@premier-typechain';
+import { DripStatus } from '@premier-types';
 
 const { parseEther: toEth } = ethers.utils;
 const { AddressZero } = ethers.constants;

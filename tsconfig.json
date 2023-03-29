@@ -7,9 +7,17 @@
         "strict": true,
         "esModuleInterop": true,
         "outDir": "dist",
-        "baseUrl": "./",
+        "baseUrl": ".",
         "paths": {
-            "@premier-contracts/*": ["*"]
+            "@premier-components/*": ["./components/*"],
+            "@premier-deploy/*": ["./deploy/*"],
+
+            "@premier-scripts": ["./scripts"],
+            "@premier-contracts": ["./contracts"],
+            "@premier-typechain": ["./typechain"],
+            "@premier-types": ["./types"],
+            "@premier-mock": ["./mock"],
+            "@premier-system": ["./system"]
         }
     }
 }

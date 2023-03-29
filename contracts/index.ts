@@ -9,7 +9,7 @@ import {
     CustomTokenInterface__factory,
     CustomNFT__factory,
     TestERC20__factory
-} from '@premier-contracts/typechain';
+} from '@premier-typechain';
 
 export const contracts = {
     CustomNFT: CustomNFT__factory,

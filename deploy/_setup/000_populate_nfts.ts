@@ -2,9 +2,9 @@ import { ethers } from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import Contracts from '@premier-contracts/components/contracts';
+import Contracts from '@premier-components/contracts';
 
-import { ListMockTokens } from '@premier-contracts/mock';
+import { ListMockTokens } from '@premier-mock';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const { getNamedAccounts } = hre;

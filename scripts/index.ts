@@ -1,7 +1,7 @@
 import { create, IPFSHTTPClient } from 'ipfs-http-client';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { DropMetadata } from '@premier-contracts/types';
+import { DropMetadata } from '@premier-types';
 
 const DROP_DIR = path.join(__dirname, '..', '_data', 'drop');
 const DROP_VERSIONS_DIR_NAME = 'versions';
