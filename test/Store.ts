@@ -30,6 +30,10 @@ describe('Store', () => {
         it('initial total supply should be properly initialized', async () => {
             expect(await Store.totalSupply()).to.equal(0);
         });
+
+        it('rights should be properly set', async () => {
+            expect(await Store.owner()).to.equal(owner.address);
+        });
     });
 
     describe('drop creation', () => {

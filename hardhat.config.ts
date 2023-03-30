@@ -44,7 +44,7 @@ const {
     ETHERSCAN_API = '',
     MAINNET_ENDPOINT = '',
     GOERLI_ENDPOINT = ''
-}: EnvOptions = process.env as any as EnvOptions;
+}: EnvOptions = process.env as EnvOptions;
 
 const forkConfig: HardhatNetworkForkingUserConfig | undefined = (() => {
     if (FORK === undefined || FORK === Networks.NONE) return undefined;

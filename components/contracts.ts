@@ -1,9 +1,9 @@
-import { buildContracts } from 'ethers-deploy-or-attach';
+import { buildContractsHardhat } from 'ethers-deploy-or-attach';
 
 import { ethers } from 'hardhat';
 
-import { contracts } from '@premier-contracts';
+import { contracts as premierContracts } from '@premier-contracts';
 
-const builtContracts = buildContracts(contracts, ethers);
+const contracts = buildContractsHardhat(premierContracts, ethers);
 
-export default builtContracts;
+export default contracts;

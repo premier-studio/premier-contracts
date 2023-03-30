@@ -2861,10 +2861,10 @@ ethereumjs-util@^7.1.1, ethereumjs-util@^7.1.3, ethereumjs-util@^7.1.4, ethereum
     ethereum-cryptography "^0.1.3"
     rlp "^2.2.4"
 
-ethers-deploy-or-attach@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/ethers-deploy-or-attach/-/ethers-deploy-or-attach-1.1.2.tgz#0472f89a3acb3b7fbc7c9bc945ef7e1f6c7f2992"
-  integrity sha512-BgM8yhv3F8PAnwB9TCqX24KAWaPflkxQUr21Jp0zjkZmE8giwp5dazV6mf15yaXZMqC6QPVMt9NxeQKf7SYD9A==
+ethers-deploy-or-attach@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/ethers-deploy-or-attach/-/ethers-deploy-or-attach-1.2.0.tgz#3045f3129d4af439d42ed8e42fa0fbf07582c247"
+  integrity sha512-WGIkE5YAnSBLbrUXVmnhsIJi5iczEXqayrErE7sqsjiTVqkkX57R2iB1c0P64GidETavxpLlG19FZg/wtZnQTQ==
   dependencies:
     browser-or-node "2.1.1"
     ethers "5.7.2"
