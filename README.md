@@ -30,7 +30,7 @@ Each **Drop** will have its own usable asset. You can think of everything from a
 
 ## Contracts
 
-> Premier's contracts are fairly simple as of now but they will most likely get more complex along the way as new features will be implemented.
+> Premier's contracts are fairly simple as of now but they will get more complex along the way as new features gets implemented.
 
 ### Store
 
@@ -38,4 +38,4 @@ The `Store.sol` contract acts as an entrypoint. It holds a reference to each Dro
 
 ### Drop
 
-The `Drop.sol` contract holds all the logic behind a **Drop** release amd its functionalities.
+The `Drop.sol` contract holds all the logic behind a **Drop** release and its functionalities.
