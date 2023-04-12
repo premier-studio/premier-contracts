@@ -12,6 +12,20 @@ import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol
 import { ITokenInterface } from "../tokens/ITokenInterface.sol";
 
 /**
+ * @dev A struct representing the general information of a Drop.
+ */
+struct DropInfo {
+    uint256 id;
+    address dropContract;
+    string symbol;
+    string name;
+    uint256 maxSupply;
+    uint8 versions;
+    uint256 price;
+    uint256 currentSupply;
+}
+
+/**
  * @dev A struct representing the status of a Drip.
  */
 enum DripStatus {
@@ -127,6 +141,23 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
         VERSIONS = _versions;
 
         transferOwnership(_owner);
+    }
+
+    /**
+     * @dev Returns the info of the DROP.
+     */
+    function info() public view returns (DropInfo memory) {
+        return
+            DropInfo({
+                id: DROP_ID,
+                dropContract: address(this),
+                symbol: symbol(),
+                name: name(),
+                maxSupply: MAX_SUPPLY,
+                versions: VERSIONS,
+                price: PRICE,
+                currentSupply: totalSupply()
+            });
     }
 
     /**
