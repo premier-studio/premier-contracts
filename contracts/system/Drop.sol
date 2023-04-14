@@ -14,15 +14,21 @@ import { ITokenInterface } from "../tokens/ITokenInterface.sol";
 /**
  * @dev A struct representing the general information of a Drop.
  */
-struct DropInfo {
-    uint256 id;
-    address dropContract;
+struct DropData {
+    // Drop Identification
+    address _contract;
     string symbol;
     string name;
-    uint256 maxSupply;
-    uint8 versions;
-    uint256 price;
+    uint256 id;
+    // Drop Info
     uint256 currentSupply;
+    uint256 maxSupply;
+    uint256 price;
+    uint8 versions;
+    // Drop URIs
+    string contractURI;
+    string dropURI;
+    string baseURI;
 }
 
 /**
@@ -144,19 +150,22 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Returns the info of the DROP.
+     * @dev Returns the general information of the DROP.
      */
-    function info() public view returns (DropInfo memory) {
+    function drop() public view returns (DropData memory) {
         return
-            DropInfo({
-                id: DROP_ID,
-                dropContract: address(this),
+            DropData({
+                _contract: address(this),
                 symbol: symbol(),
                 name: name(),
-                maxSupply: MAX_SUPPLY,
-                versions: VERSIONS,
-                price: PRICE,
-                currentSupply: totalSupply()
+                id: dropId(),
+                maxSupply: maxSupply(),
+                versions: versions(),
+                price: price(),
+                currentSupply: totalSupply(),
+                dropURI: dropURI(),
+                contractURI: contractURI(),
+                baseURI: baseURI()
             });
     }
 
