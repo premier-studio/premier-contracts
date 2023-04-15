@@ -32,6 +32,19 @@ struct DropData {
 }
 
 /**
+ * @dev A struct representing the general information of a Drip.
+ */
+struct DripData {
+    // Drip Identification
+    uint256 id;
+    DropData drop;
+    // Drip Info
+    address owner;
+    // Drip Metadata
+    Drip drip;
+}
+
+/**
  * @dev A struct representing the status of a Drip.
  */
 enum DripStatus {
@@ -170,6 +183,19 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     }
 
     /**
+     * @dev Returns the Drip matching the drip id.
+     */
+    function drip(uint256 dripId) public view returns (DripData memory) {
+        Drip memory _drip = dripIdToDrip[dripId];
+
+        if (dripId >= totalSupply()) {
+            revert InvalidDripId();
+        }
+
+        return DripData({ id: dripId, drop: drop(), owner: this.ownerOf(dripId), drip: _drip });
+    }
+
+    /**
      * @dev Returns the id of the DROP.
      */
     function dropId() public view returns (uint256) {
@@ -198,14 +224,10 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Returns the Drip matching the drip id.
+     * @dev Get token interface.
      */
-    function drip(uint256 dripId) public view returns (Drip memory) {
-        if (dripId >= totalSupply()) {
-            revert InvalidDripId();
-        }
-
-        return dripIdToDrip[dripId];
+    function tokenContractInterface(address tokenContract) public view returns (ITokenInterface) {
+        return tokenAddressToInterface[tokenContract];
     }
 
     /**
@@ -213,13 +235,6 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
      */
     function setTokenContractInterface(address tokenContract, ITokenInterface _ITokenInterface) public onlyOwner {
         tokenAddressToInterface[tokenContract] = _ITokenInterface;
-    }
-
-    /**
-     * @dev Get token interface.
-     */
-    function getTokenContractInterface(address tokenContract) public view returns (ITokenInterface) {
-        return tokenAddressToInterface[tokenContract];
     }
 
     /**
@@ -237,13 +252,6 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Load the contract URI.
-     */
-    function setContractURI(string memory newURI) public onlyOwner {
-        CONTRACT_URI = newURI;
-    }
-
-    /**
      * @dev Returns the contract URI.
      */
     function contractURI() public view returns (string memory) {
@@ -251,10 +259,10 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Load the baseURI of the Drips.
+     * @dev Load the contract URI.
      */
-    function setBaseURI(string memory newURI) public onlyOwner {
-        BASE_DRIP_URI = newURI;
+    function setContractURI(string memory newURI) public onlyOwner {
+        CONTRACT_URI = newURI;
     }
 
     /**
@@ -269,6 +277,13 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
      */
     function _baseURI() internal view override returns (string memory) {
         return BASE_DRIP_URI;
+    }
+
+    /**
+     * @dev Load the baseURI of the Drips.
+     */
+    function setBaseURI(string memory newURI) public onlyOwner {
+        BASE_DRIP_URI = newURI;
     }
 
     /**
@@ -355,7 +370,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
         } catch {
             // if this code is reached it means that tokenContract is a custom contract,
             // so let's check if we have it stored in our contract interface system
-            ITokenInterface tokenInterface = getTokenContractInterface(address(tokenContract));
+            ITokenInterface tokenInterface = tokenContractInterface(address(tokenContract));
 
             // there is no support for this contract yet
             if (address(tokenInterface) == address(0)) {

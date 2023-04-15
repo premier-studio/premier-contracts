@@ -193,12 +193,12 @@ describe('Drop', () => {
         });
 
         it('initial token contract interface should be nil', async () => {
-            expect(await Drop.getTokenContractInterface(testToken.address)).to.equal(AddressZero);
+            expect(await Drop.tokenContractInterface(testToken.address)).to.equal(AddressZero);
         });
 
         it('should set properly', async () => {
             await Drop.setTokenContractInterface(testToken.address, testInterface.address);
-            expect(await Drop.getTokenContractInterface(testToken.address)).to.equal(testInterface.address);
+            expect(await Drop.tokenContractInterface(testToken.address)).to.equal(testInterface.address);
         });
 
         context('permission', () => {
@@ -225,7 +225,7 @@ describe('Drop', () => {
             await Drop.mint(DEFAULT_DRIP_VERSION);
 
             const drip = await Drop.drip(0);
-            expect(drip.version).equal(0);
+            expect(drip.drip.version).equal(0);
         });
     });
 
@@ -297,10 +297,10 @@ describe('Drop', () => {
             it('minted drip should be properly initialized', async () => {
                 const drip = await Drop.drip(dripId);
 
-                expect(drip.version).equal(version);
-                expect(drip.status).equal(DripStatus.DEFAULT);
-                expect(drip.mutation.tokenContract).equal(AddressZero);
-                expect(drip.mutation.tokenId).equal(0);
+                expect(drip.drip.version).equal(version);
+                expect(drip.drip.status).equal(DripStatus.DEFAULT);
+                expect(drip.drip.mutation.tokenContract).equal(AddressZero);
+                expect(drip.drip.mutation.tokenId).equal(0);
             });
         };
 
@@ -397,9 +397,9 @@ describe('Drop', () => {
 
                 const drip = await Drop.drip(0);
 
-                expect(drip.status).to.equal(DripStatus.MUTATED);
-                expect(drip.mutation.tokenContract).to.equal(tokenMutating.address);
-                expect(drip.mutation.tokenId).to.equal(0);
+                expect(drip.drip.status).to.equal(DripStatus.MUTATED);
+                expect(drip.drip.mutation.tokenContract).to.equal(tokenMutating.address);
+                expect(drip.drip.mutation.tokenId).to.equal(0);
             });
         });
 
@@ -495,9 +495,9 @@ describe('Drop', () => {
 
                     const drip = await Drop.drip(0);
 
-                    expect(drip.status).to.equal(DripStatus.MUTATED);
-                    expect(drip.mutation.tokenContract).to.equal(cryptoPunksMarket.address);
-                    expect(drip.mutation.tokenId).to.equal(TEST_TOKEN);
+                    expect(drip.drip.status).to.equal(DripStatus.MUTATED);
+                    expect(drip.drip.mutation.tokenContract).to.equal(cryptoPunksMarket.address);
+                    expect(drip.drip.mutation.tokenId).to.equal(TEST_TOKEN);
                 });
             });
         });
