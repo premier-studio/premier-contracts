@@ -7,7 +7,7 @@ const DROP_DIR = path.join(__dirname, '..', '_data', 'drop');
 const DROP_VERSIONS_DIR_NAME = 'versions';
 const DROP_MODEL_FILE = 'model.glb';
 
-const IPFS_PREFIX = 'ipfs://';
+export const IPFS_PREFIX = 'ipfs://';
 
 const node: IPFSHTTPClient = create({ url: '/ip4/127.0.0.1/tcp/5001' });
 

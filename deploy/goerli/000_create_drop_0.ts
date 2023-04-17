@@ -4,7 +4,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import Contracts from '@premier-components/contracts';
 import { STORE } from '@premier-deploy/_default/000_deploy_store';
-import { publishDropMetadataToIPFS } from '@premier-scripts';
+import { IPFS_PREFIX, publishDropMetadataToIPFS } from '@premier-scripts';
 
 const { parseEther: toEth } = ethers.utils;
 
@@ -38,8 +38,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     };
 
     const dropContract = await getContract(DROP_ID);
-    const address = await publishDropMetadataToIPFS(DROP_ID);
-    await dropContract.setDropURI(address);
+    await dropContract.setDropURI(IPFS_PREFIX + 'QmciaLdP3NwPa9PinfoEqHndz72FjNTPckGCDrb5C2LmQp');
 };
 
 export default func;
