@@ -164,7 +164,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     /**
      * @dev Returns the general information of the DROP.
      */
-    function drop() public view returns (DropData memory) {
+    function info() public view returns (DropData memory) {
         return
             DropData({
                 _contract: address(this),

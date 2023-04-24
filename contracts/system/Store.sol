@@ -39,25 +39,6 @@ contract Store is Ownable {
         return dropIdToDrop[dropId];
     }
 
-    function getDrips(address owner) public view returns (DripData[][] memory) {
-        DripData[][] memory drips = new DripData[][](TOTAL_SUPPLY);
-
-        for (uint dropId = 0; dropId < TOTAL_SUPPLY; dropId++) {
-            Drop _drop = dropIdToDrop[dropId];
-
-            uint256 dripBalanceOfAddress = _drop.balanceOf(owner);
-            DripData[] memory dripsInDrop = new DripData[](dripBalanceOfAddress);
-
-            for (uint dripIndex = 0; dripIndex < dripBalanceOfAddress; dripIndex++) {
-                uint256 dripId = _drop.tokenOfOwnerByIndex(owner, dripIndex);
-                dripsInDrop[dripIndex] = _drop.drip(dripId);
-            }
-            drips[dropId] = dripsInDrop;
-        }
-
-        return drips;
-    }
-
     /**
      * @dev Create a DROP.
      */
