@@ -12,39 +12,6 @@ import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol
 import { ITokenInterface } from "../tokens/ITokenInterface.sol";
 
 /**
- * @dev A struct representing the general information of a Drop.
- */
-struct DropData {
-    // Drop Identification
-    address _contract;
-    string symbol;
-    string name;
-    uint256 id;
-    // Drop Info
-    uint256 currentSupply;
-    uint256 maxSupply;
-    uint256 price;
-    uint8 versions;
-    // Drop URIs
-    string contractURI;
-    string dropURI;
-    string baseURI;
-}
-
-/**
- * @dev A struct representing the general information of a Drip.
- */
-struct DripData {
-    // Drip Identification
-    uint256 id;
-    DropData drop;
-    // Drip Info
-    address owner;
-    // Drip Metadata
-    Drip drip;
-}
-
-/**
  * @dev A struct representing the status of a Drip.
  */
 enum DripStatus {
@@ -70,6 +37,38 @@ struct Drip {
     DripStatus status;
     // mutation
     DripMutation mutation;
+}
+
+/**
+ * @dev A struct representing the general information of a Drop.
+ */
+struct DropData {
+    // Drop Identification
+    address _contract;
+    string symbol;
+    string name;
+    uint256 id;
+    // Drop Info
+    uint256 currentSupply;
+    uint256 maxSupply;
+    uint256 price;
+    uint8 versions;
+    // Drop URIs
+    string contractURI;
+    string dropURI;
+    string baseURI;
+}
+
+/**
+ * @dev A struct representing the general information of a Drip.
+ */
+struct DripData {
+    // Drip Identification
+    uint256 id;
+    // Drip Info
+    address owner;
+    // Drip Metadata
+    Drip drip;
 }
 
 /**
@@ -192,7 +191,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
             revert InvalidDripId();
         }
 
-        return DripData({ id: dripId, drop: drop(), owner: this.ownerOf(dripId), drip: _drip });
+        return DripData({ id: dripId, owner: this.ownerOf(dripId), drip: _drip });
     }
 
     /**

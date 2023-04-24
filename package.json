@@ -1,6 +1,6 @@
 {
     "name": "@premier-labs/contracts",
-    "version": "0.0.72",
+    "version": "0.0.74",
     "license": "MIT",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -15,7 +15,7 @@
         "lint:sol": "solhint --max-warnings 0 contracts/**/*.sol",
         "lint:ts": "yarn eslint components deploy test scripts system types mock",
         "re": "yarn clean && yarn build",
-        "start": "FORK=MAINNET FORK_BN=16226501 yarn hardhat node",
+        "start": "FORK=MAINNET FORK_BN=16226501 yarn hardhat node --hostname 0.0.0.0",
         "test": "hardhat test"
     },
     "dependencies": {
