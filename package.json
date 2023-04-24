@@ -1,6 +1,6 @@
 {
     "name": "@premier-labs/contracts",
-    "version": "0.0.74",
+    "version": "0.0.77",
     "license": "MIT",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
