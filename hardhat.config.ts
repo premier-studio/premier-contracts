@@ -6,7 +6,9 @@ import process from 'process';
 
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-etherscan';
-import '@nomiclabs/hardhat-waffle';
+import '@nomicfoundation/hardhat-chai-matchers';
+
+import 'hardhat-gas-reporter';
 
 import '@typechain/hardhat';
 
@@ -102,7 +104,7 @@ const config: HardhatUserConfig = {
     solidity: {
         compilers: [
             {
-                version: '0.8.19',
+                version: '0.8.18',
                 settings: {
                     optimizer: {
                         enabled: true,

@@ -1,6 +1,6 @@
 {
     "name": "@premier-labs/contracts",
-    "version": "0.0.8",
+    "version": "0.0.81",
     "license": "MIT",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -21,11 +21,12 @@
     "dependencies": {
         "@typechain/ethers-v5": "^10.2.0",
         "@typechain/hardhat": "^6.1.5",
-        "hardhat": "^2.12.4",
+        "hardhat": "^2.14.0",
         "typechain": "^8.1.1",
         "typescript": "^4.9.5"
     },
     "devDependencies": {
+        "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
         "@nomiclabs/hardhat-ethers": "^2.2.2",
         "@nomiclabs/hardhat-etherscan": "^3.1.5",
         "@nomiclabs/hardhat-solhint": "^3.0.0",
@@ -50,6 +51,7 @@
         "ethers": "^5.7.2",
         "ethers-deploy-or-attach": "^1.2.0",
         "hardhat-deploy": "^0.11.23",
+        "hardhat-gas-reporter": "^1.0.9",
         "hardhat-tracer": "^1.2.0",
         "ipfs-http-client": "56.0.2",
         "prettier": "^2.4.1",

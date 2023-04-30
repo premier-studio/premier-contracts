@@ -20,8 +20,6 @@ In order to mutate a **Drip**, the only thing required is to have the NFT you wa
 
 ⚠️ Once mutated, a Drip is indefinitely linked to the NFT it has been mutated with and its state will forever change to **Mutated**.
 
-> Contract wise this is simple to do for ERC721 tokens but once out of that normalized scope things can become tricky. Here comes the `ITokenInterface.sol` interface. This interface is meant to be implemented by a contract that will act as a bridge between the Drip mutating process and the NFT mutating's contract.
-
 ### Drop
 
 Drips releases will be held under the form of **Drop**. A "drop" refers to the limited release of a an asset.

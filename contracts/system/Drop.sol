@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
-pragma solidity 0.8.19;
+pragma solidity 0.8.18;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -8,8 +8,6 @@ import { IERC721 } from "@openzeppelin/contracts/interfaces/IERC721.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-
-import { ITokenInterface } from "../tokens/ITokenInterface.sol";
 
 /**
  * @dev A struct representing the status of a Drip.
@@ -20,7 +18,7 @@ enum DripStatus {
 }
 
 /**
- * @dev A struct representing a Drip mutation.
+ * @dev A struct representing the mutation of a Drip.
  */
 struct DripMutation {
     address tokenContract;
@@ -31,18 +29,18 @@ struct DripMutation {
  * @dev A struct representing a Drip.
  */
 struct Drip {
-    // metadata
+    // Drip Metadata
     uint8 version;
-    // status
+    // Drip Status
     DripStatus status;
-    // mutation
+    // Drip Mutation
     DripMutation mutation;
 }
 
 /**
  * @dev A struct representing the general information of a Drop.
  */
-struct DropData {
+struct DropInfo {
     // Drop Identification
     address _contract;
     string symbol;
@@ -62,7 +60,7 @@ struct DropData {
 /**
  * @dev A struct representing the general information of a Drip.
  */
-struct DripData {
+struct DripInfo {
     // Drip Identification
     uint256 id;
     // Drip Info
@@ -81,46 +79,32 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     string public constant SYMBOL_PREFIX = "DROP#";
 
     // Contract's URI
-    string public CONTRACT_URI = "";
+    string private CONTRACT_URI = "";
 
     // Drop's URI
-    string public DROP_URI = "";
+    string private DROP_URI = "";
 
     // Drips's base URI
-    string public BASE_DRIP_URI = "";
+    string private BASE_URI = "";
 
     // Immutables
 
-    // The id of the DROP
-    uint256 public immutable DROP_ID;
+    // The id of the Drop
+    uint256 private immutable DROP_ID;
 
-    // The maximum supply of the DROP
-    uint256 public immutable MAX_SUPPLY;
+    // The maximum supply of the Drop
+    uint256 private immutable MAX_SUPPLY;
 
     // The price to mint the Drip
-    uint256 public immutable PRICE;
+    uint256 private immutable PRICE;
 
     // The number of versions
-    uint8 public immutable VERSIONS; // starts at version 1, cannot be 0
+    uint8 private immutable VERSIONS; // starts at version 1, cannot be 0
 
     // Mappings
 
     // Mapping from drip id to Drip
-    mapping(uint256 => Drip) public dripIdToDrip;
-
-    // Mapping from a token contract address to ITokenInterface
-    mapping(address => ITokenInterface) public tokenAddressToInterface;
-
-    // Events
-
-    // Event triggered when a Drip is minted
-    event Minted(uint256 indexed dripId);
-
-    // Event triggered when a Drip is mutated
-    event Mutated(uint256 indexed dripId);
-
-    // Event triggered when funds are withdrawn
-    event Withdrawn(uint256 funds);
+    mapping(uint256 => Drip) private dripIdToDrip;
 
     // Errors
 
@@ -142,13 +126,14 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
         uint256 id,
         uint256 _maxSupply,
         uint256 _price,
-        uint8 _versions,
-        address _owner
+        uint8 _versions
     ) ERC721(string.concat(NAME_PREFIX, Strings.toString(id)), string.concat(SYMBOL_PREFIX, Strings.toString(id))) {
+        // Drop should have at least one Drip
         if (_maxSupply == 0) {
             revert InvalidMaxSupply();
         }
 
+        // Drop should have at least one version
         if (_versions == 0) {
             revert InvalidVersions();
         }
@@ -157,16 +142,14 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
         MAX_SUPPLY = _maxSupply;
         PRICE = _price;
         VERSIONS = _versions;
-
-        transferOwnership(_owner);
     }
 
     /**
-     * @dev Returns the general information of the DROP.
+     * @dev Returns the general information of the Drop.
      */
-    function info() public view returns (DropData memory) {
+    function dropInfo() public view returns (DropInfo memory) {
         return
-            DropData({
+            DropInfo({
                 _contract: address(this),
                 symbol: symbol(),
                 name: name(),
@@ -175,41 +158,41 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
                 versions: versions(),
                 price: price(),
                 currentSupply: totalSupply(),
-                dropURI: dropURI(),
                 contractURI: contractURI(),
+                dropURI: dropURI(),
                 baseURI: baseURI()
             });
     }
 
     /**
-     * @dev Returns the Drip matching the drip id.
+     * @dev Returns the Drip matching the Drip id.
      */
-    function drip(uint256 dripId) public view returns (DripData memory) {
+    function dripInfo(uint256 dripId) public view returns (DripInfo memory) {
         Drip memory _drip = dripIdToDrip[dripId];
 
         if (dripId >= totalSupply()) {
             revert InvalidDripId();
         }
 
-        return DripData({ id: dripId, owner: this.ownerOf(dripId), drip: _drip });
+        return DripInfo({ id: dripId, owner: this.ownerOf(dripId), drip: _drip });
     }
 
     /**
-     * @dev Returns the id of the DROP.
+     * @dev Returns the id of the Drop.
      */
     function dropId() public view returns (uint256) {
         return DROP_ID;
     }
 
     /**
-     * @dev Returns the maximum supply of the DROP.
+     * @dev Returns the maximum supply of the Drop.
      */
     function maxSupply() public view returns (uint256) {
         return MAX_SUPPLY;
     }
 
     /**
-     * @dev Returns the price of the mint.
+     * @dev Returns the price to mint a Drip from this Drop.
      */
     function price() public view returns (uint256) {
         return PRICE;
@@ -223,34 +206,6 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Get token interface.
-     */
-    function tokenContractInterface(address tokenContract) public view returns (ITokenInterface) {
-        return tokenAddressToInterface[tokenContract];
-    }
-
-    /**
-     * @dev Load token interface.
-     */
-    function setTokenContractInterface(address tokenContract, ITokenInterface _ITokenInterface) public onlyOwner {
-        tokenAddressToInterface[tokenContract] = _ITokenInterface;
-    }
-
-    /**
-     * @dev Returns the URI of the metadata of the DROP.
-     */
-    function dropURI() public view returns (string memory) {
-        return DROP_URI;
-    }
-
-    /**
-     * @dev Load the baseURI of the metadata of the DROP.
-     */
-    function setDropURI(string memory newURI) public onlyOwner {
-        DROP_URI = newURI;
-    }
-
-    /**
      * @dev Returns the contract URI.
      */
     function contractURI() public view returns (string memory) {
@@ -258,87 +213,89 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Load the contract URI.
+     * @dev Set the contract URI.
      */
     function setContractURI(string memory newURI) public onlyOwner {
         CONTRACT_URI = newURI;
     }
 
     /**
-     * @dev Returns the baseURI of the Drips.
+     * @dev Returns the URI of the metadata of the Drop.
+     */
+    function dropURI() public view returns (string memory) {
+        return DROP_URI;
+    }
+
+    /**
+     * @dev Set the URI of the metadata of the Drop.
+     */
+    function setDropURI(string memory newURI) public onlyOwner {
+        DROP_URI = newURI;
+    }
+
+    /**
+     * @dev Returns the baseURI.
      */
     function baseURI() public view returns (string memory) {
-        return BASE_DRIP_URI;
+        return BASE_URI;
     }
 
     /**
-     * @dev Returns the baseURI of the Drips.
+     * @dev Returns the baseURI.
      */
     function _baseURI() internal view override returns (string memory) {
-        return BASE_DRIP_URI;
+        return baseURI();
     }
 
     /**
-     * @dev Load the baseURI of the Drips.
+     * @dev Set the baseURI.
      */
     function setBaseURI(string memory newURI) public onlyOwner {
-        BASE_DRIP_URI = newURI;
-    }
-
-    /**
-     * @dev Withdraw funds.
-     */
-    function withdraw() public onlyOwner {
-        uint256 balance = address(this).balance;
-        payable(owner()).transfer(balance);
-
-        emit Withdrawn(balance);
+        BASE_URI = newURI;
     }
 
     /**
      * @dev Mint a Drip.
      */
-    function mint(uint8 versionId) external payable nonReentrant {
-        uint256 dripId = totalSupply();
+    function mint(uint8 versionId, address caller) external payable nonReentrant onlyOwner returns (uint256 dripId) {
+        dripId = totalSupply();
 
-        // Token id to be minted needs to be below the max supply limit
-        if (dripId >= maxSupply()) {
+        // Drip id to be minted needs to be below the max supply limit
+        if (dripId >= MAX_SUPPLY) {
             revert MaxSupplyReached();
         }
 
-        // Minter needs to mint a correct version of the DROP
+        // Caller needs to mint a valid Drip version
         if (versionId >= VERSIONS) {
             revert InvalidVersionId();
         }
 
-        // Minter needs to provide the correct amount
+        // Caller needs to provide a valid price
         if (msg.value != PRICE) {
             revert InvalidPrice();
         }
 
-        _safeMint(msg.sender, dripId);
+        _safeMint(caller, dripId);
         dripIdToDrip[dripId] = Drip({
             version: versionId,
             status: DripStatus.DEFAULT,
             mutation: DripMutation({ tokenContract: address(0), tokenId: 0 })
         });
-
-        emit Minted(dripId);
     }
 
     /**
      * @dev Mutate a Drip.
      */
-    function mutate(uint256 dripId, IERC721 tokenContract, uint256 tokenId) external nonReentrant {
+    function mutate(
+        uint256 dripId,
+        IERC721 tokenContract,
+        uint256 tokenId,
+        address caller
+    ) external nonReentrant onlyOwner {
         Drip storage _drip = dripIdToDrip[dripId];
 
-        // Drip to be mutated should exist
-        if (dripId >= totalSupply()) {
-            revert InvalidDripId();
-        }
-
-        // Drip owner should be the msg.sender
-        if (_ownerOf(dripId) != msg.sender) {
+        // Caller should own the Drip
+        if (_ownerOf(dripId) != caller) {
             revert InvalidDripOwner();
         }
 
@@ -347,46 +304,21 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
             revert AlreadyMutated();
         }
 
-        // check if tokenContract support IERC721 interface
-        try IERC165(address(tokenContract)).supportsInterface(type(IERC721).interfaceId) returns (bool doesSupport) {
-            if (doesSupport) {
-                // if it does support it, let's call ownerOf like any regular ERC721 contract
-                try tokenContract.ownerOf(tokenId) returns (address tokenOwner) {
-                    // if owner of tokenId is not msg.sender, reverts
-                    if (tokenOwner != msg.sender) {
-                        revert InvalidTokenOwner();
-                    }
-                    // else, all good, it's the owner
-                } catch {
-                    // if this code is reached it means that ownerOf threw (most likely "ERC721: invalid token ID" but it could technically be something else)
-                    revert InvalidTokenOwner();
-                }
-            } else {
-                // if this code is reached it means that the contract implement the supportsInterface
-                // function but doesn't support ERC721, so most likely an ERC20 contract or such
-                revert UnsupportedTokenContract();
-            }
-        } catch {
-            // if this code is reached it means that tokenContract is a custom contract,
-            // so let's check if we have it stored in our contract interface system
-            ITokenInterface tokenInterface = tokenContractInterface(address(tokenContract));
-
-            // there is no support for this contract yet
-            if (address(tokenInterface) == address(0)) {
-                revert UnsupportedTokenContract();
-            }
-
-            if (tokenInterface.ownerOf(tokenId) != msg.sender) {
-                revert InvalidTokenOwner();
-            }
-
-            // all good
+        // Owner of tokenId should be the caller
+        if (tokenContract.ownerOf(tokenId) != caller) {
+            revert InvalidTokenOwner();
         }
 
         _drip.status = DripStatus.MUTATED;
         _drip.mutation.tokenContract = address(tokenContract);
         _drip.mutation.tokenId = tokenId;
+    }
 
-        emit Mutated(dripId);
+    /**
+     * @dev Withdraw funds.
+     */
+    function withdraw(address to) public onlyOwner returns (uint256 balance) {
+        balance = address(this).balance;
+        payable(to).transfer(balance);
     }
 }
