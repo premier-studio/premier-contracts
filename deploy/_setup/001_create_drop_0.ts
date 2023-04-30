@@ -2,7 +2,7 @@ import { ethers } from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { STORE } from '@premier-deploy/_default/001_deploy_store';
+import { STORE } from '@premier-deploy/_default/000_deploy_store';
 import { publishDropMetadataToIPFS } from '@premier-scripts';
 
 const { parseEther: toEth } = ethers.utils;

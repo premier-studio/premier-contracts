@@ -88,7 +88,7 @@ const config: HardhatUserConfig = {
             chainId: 5,
             deploy: [DEFAULT_DEPLOY_DIR, './deploy/goerli'],
             accounts: HARDHAT_DEPLOYER ? [HARDHAT_DEPLOYER] : undefined,
-            gasPrice: 90000000000 // 90 Gwei
+            gasPrice: 9000000000 // 9 Gwei
         }
     },
 
