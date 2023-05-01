@@ -36,6 +36,7 @@ interface EnvOptions {
     ETHERSCAN_API?: string;
     MAINNET_ENDPOINT?: string;
     GOERLI_ENDPOINT?: string;
+    SEPOLIA_ENDPOINT?: string;
 }
 
 const {
@@ -45,7 +46,8 @@ const {
     HARDHAT_USER = '',
     ETHERSCAN_API = '',
     MAINNET_ENDPOINT = '',
-    GOERLI_ENDPOINT = ''
+    GOERLI_ENDPOINT = '',
+    SEPOLIA_ENDPOINT = ''
 }: EnvOptions = process.env as EnvOptions;
 
 const forkConfig: HardhatNetworkForkingUserConfig | undefined = (() => {
@@ -89,6 +91,13 @@ const config: HardhatUserConfig = {
             deploy: [DEFAULT_DEPLOY_DIR, './deploy/goerli'],
             accounts: HARDHAT_DEPLOYER ? [HARDHAT_DEPLOYER] : undefined,
             gasPrice: 9000000000 // 9 Gwei
+        },
+        sepolia: {
+            url: SEPOLIA_ENDPOINT,
+            chainId: 11155111,
+            deploy: [DEFAULT_DEPLOY_DIR, './deploy/sepolia'],
+            accounts: HARDHAT_DEPLOYER ? [HARDHAT_DEPLOYER] : undefined,
+            gasPrice: 2000000000 // 2 Gwei
         }
     },
 
