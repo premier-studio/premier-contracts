@@ -21,7 +21,7 @@ enum DripStatus {
  * @dev A struct representing the mutation of a Drip.
  */
 struct DripMutation {
-    address tokenContract;
+    IERC721 tokenContract;
     uint256 tokenId;
 }
 
@@ -279,7 +279,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
         dripIdToDrip[dripId] = Drip({
             version: versionId,
             status: DripStatus.DEFAULT,
-            mutation: DripMutation({ tokenContract: address(0), tokenId: 0 })
+            mutation: DripMutation({ tokenContract: IERC721(address(0)), tokenId: 0 })
         });
     }
 
@@ -310,7 +310,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
         }
 
         _drip.status = DripStatus.MUTATED;
-        _drip.mutation.tokenContract = address(tokenContract);
+        _drip.mutation.tokenContract = tokenContract;
         _drip.mutation.tokenId = tokenId;
     }
 

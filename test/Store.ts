@@ -52,6 +52,22 @@ describe('Store', () => {
         [owner, user] = await ethers.getSigners();
     });
 
+    const createDrop = async ({
+        maxSupply = DEFAULT_DROP_MAX_SUPPLY,
+        price = DEFAULT_DROP_PRICE,
+        versions = DEFAULT_DROP_VERSIONS
+    }) => {
+        const tx = await Store.connect(owner).createDrop(maxSupply, price, versions);
+        const receipt = await tx.wait();
+
+        if (receipt && receipt.events) {
+            const dropId = (receipt.events[1] as any).args.dropId;
+            return { Drop: await Contracts.Drop.attach(await Store.drop(dropId)), dropId };
+        }
+
+        throw Error('');
+    };
+
     describe('construction', () => {
         before(async () => {
             Store = await Contracts.Store.deploy();
@@ -92,7 +108,7 @@ describe('Store', () => {
                     expect(await Store.dropSupply()).to.equal(snapshotDropTotalSupply.add(1));
                 });
 
-                it('should be properly initialized the drop', async () => {
+                it('should be properly initialized on drop', async () => {
                     const drop = await Contracts.Drop.attach(await Store.drop(dropId));
 
                     expect(await drop.owner()).to.equal(Store.address);
@@ -109,10 +125,26 @@ describe('Store', () => {
                     expect(await drop.dropURI()).to.equal('');
                     expect(await drop.baseURI()).to.equal('');
                 });
+
+                it('should be properly initialized on store', async () => {
+                    const drop = await Store.dropInfo(dropId);
+
+                    expect(drop.name).to.equal('DROP#' + dropId);
+                    expect(drop.symbol).to.equal('DROP#' + dropId);
+                    expect(drop.id).to.equal(dropId);
+                    expect(drop.currentSupply).to.equal(0);
+                    expect(drop.maxSupply).to.equal(maxSupply);
+                    expect(drop.price).to.equal(price);
+                    expect(drop.versions).to.equal(versions);
+
+                    expect(drop.contractURI).to.equal('');
+                    expect(drop.dropURI).to.equal('');
+                    expect(drop.baseURI).to.equal('');
+                });
             };
 
             let dropId = 0;
-            for (const maxSupply of [1, 5, 100]) {
+            for (const maxSupply of [1, 100, 2500, 50000]) {
                 for (const price of [toEth('0.05'), toEth('0.25'), toEth('2.5')]) {
                     for (const versions of [1, 5, 10]) {
                         context(`with maxSupply: ${maxSupply}, price: ${price}`, () => {
@@ -131,7 +163,7 @@ describe('Store', () => {
                             DEFAULT_DROP_PRICE,
                             DEFAULT_DROP_VERSIONS
                         )
-                    ).to.revertedWith(OwnableError);
+                    ).to.be.revertedWith(OwnableError);
                 });
             });
 
@@ -146,75 +178,78 @@ describe('Store', () => {
             });
         });
 
-        describe('getter', () => {
+        describe('get drop', () => {
             before(async () => {
                 Store = await Contracts.Store.deploy();
             });
 
             it('should revert when accessing an invalid drop', async () => {
                 await expect(Store.drop(DEFAULT_DROP_ID)).to.be.revertedWithCustomError(Store, InvalidDropId);
+                await expect(Store.dropInfo(DEFAULT_DROP_ID)).to.be.revertedWithCustomError(Store, InvalidDropId);
+            });
+
+            it('should returns drop when drop id is valid', async () => {
+                await Store.createDrop(DEFAULT_DROP_MAX_SUPPLY, DEFAULT_DROP_PRICE, DEFAULT_DROP_VERSIONS);
+
+                const drop = await Store.drop(DEFAULT_DROP_ID);
+                const dropInfo = await Store.dropInfo(DEFAULT_DROP_ID);
+
+                expect(drop).to.equal(dropInfo._contract);
+                expect(dropInfo.id).to.equal(DEFAULT_DROP_ID);
             });
         });
 
         describe('URIs', () => {
             const newURI = 'https://google.com';
 
+            let dropId: BigNumber;
+
             before(async () => {
                 Store = await Contracts.Store.deploy();
+            });
 
-                await Store.createDrop(DEFAULT_DROP_MAX_SUPPLY, DEFAULT_DROP_PRICE, DEFAULT_DROP_VERSIONS);
+            beforeEach(async () => {
+                ({ dropId } = await createDrop({}));
             });
 
             context('contractURI', () => {
                 it('should be able to change contractURI', async () => {
-                    expect((await Store.dropInfo(DEFAULT_DROP_ID)).contractURI).to.equal('');
-
-                    await Store.setContractURI(DEFAULT_DROP_ID, newURI);
-
-                    expect((await Store.dropInfo(DEFAULT_DROP_ID)).contractURI).to.equal(newURI);
+                    expect((await Store.dropInfo(dropId)).contractURI).to.equal('');
+                    await Store.setContractURI(dropId, newURI);
+                    expect((await Store.dropInfo(dropId)).contractURI).to.equal(newURI);
                 });
 
                 context('permission', () => {
                     it('should revert when not allowed to change contractURI', async () => {
-                        await expect(Store.connect(user).setContractURI(DEFAULT_DROP_ID, newURI)).to.revertedWith(
-                            OwnableError
-                        );
+                        await expect(Store.connect(user).setContractURI(dropId, newURI)).to.revertedWith(OwnableError);
                     });
                 });
             });
 
             context('dropURI', () => {
                 it('should be able to change dropURI', async () => {
-                    expect((await Store.dropInfo(DEFAULT_DROP_ID)).dropURI).to.equal('');
-
-                    await Store.setDropURI(DEFAULT_DROP_ID, newURI);
-
-                    expect((await Store.dropInfo(DEFAULT_DROP_ID)).dropURI).to.equal(newURI);
+                    expect((await Store.dropInfo(dropId)).dropURI).to.equal('');
+                    await Store.setDropURI(dropId, newURI);
+                    expect((await Store.dropInfo(dropId)).dropURI).to.equal(newURI);
                 });
 
                 context('permission', () => {
                     it('should revert when not allowed to change dropURI', async () => {
-                        await expect(Store.connect(user).setDropURI(DEFAULT_DROP_ID, newURI)).to.revertedWith(
-                            OwnableError
-                        );
+                        await expect(Store.connect(user).setDropURI(dropId, newURI)).to.revertedWith(OwnableError);
                     });
                 });
             });
 
             context('dropURI', () => {
                 it('Owner: should be able to change baseURI', async () => {
-                    expect((await Store.dropInfo(DEFAULT_DROP_ID)).baseURI).to.equal('');
-
-                    await Store.setBaseURI(DEFAULT_DROP_ID, newURI);
-
-                    expect((await Store.dropInfo(DEFAULT_DROP_ID)).baseURI).to.equal(newURI);
+                    expect((await Store.dropInfo(dropId)).baseURI).to.equal('');
+                    await Store.setBaseURI(dropId, newURI);
+                    expect((await Store.dropInfo(dropId)).baseURI).to.equal(newURI);
                 });
 
                 context('permission', () => {
                     it('should revert when not allowed to change baseURI', async () => {
-                        await expect(Store.connect(user).setBaseURI(DEFAULT_DROP_ID, newURI)).to.revertedWith(
-                            OwnableError
-                        );
+                        await expect(Store.connect(user).setBaseURI(dropId, newURI)).to.revertedWith(OwnableError);
                     });
                 });
             });
@@ -224,32 +259,31 @@ describe('Store', () => {
             const MINT_NB = 5;
 
             let Drop: Drop;
+            let dropId: BigNumber;
 
-            beforeEach(async () => {
+            before(async () => {
                 Store = await Contracts.Store.deploy();
             });
 
             beforeEach(async () => {
-                await Store.createDrop(MINT_NB, DEFAULT_DROP_PRICE, DEFAULT_DROP_VERSIONS);
+                ({ Drop, dropId } = await createDrop({ maxSupply: MINT_NB }));
 
                 for (let i = 0; i < MINT_NB; i++) {
-                    await Store.mint(DEFAULT_DROP_ID, DEFAULT_DRIP_VERSION, { value: DEFAULT_DROP_PRICE });
+                    await Store.mint(dropId, DEFAULT_DRIP_VERSION, { value: DEFAULT_DROP_PRICE });
                 }
-
-                Drop = await Contracts.Drop.attach(await Store.drop(DEFAULT_DROP_ID));
             });
 
             it('should widthdraw all fund', async () => {
                 expect(await ethers.provider.getBalance(Drop.address)).to.equal(DEFAULT_DROP_PRICE.mul(MINT_NB));
-                await Store.withdraw(DEFAULT_DROP_ID);
+                await Store.withdraw(dropId);
                 expect(await ethers.provider.getBalance(Drop.address)).to.equal(0);
             });
 
-            it("should increment owner's balance", async () => {
+            it("should increment caller's balance", async () => {
                 const snapshotOwnerBalance = await owner.getBalance();
                 const snapshotDropBalance = await ethers.provider.getBalance(Drop.address);
 
-                const res = await (await Store.withdraw(DEFAULT_DROP_ID)).wait();
+                const res = await (await Store.withdraw(dropId)).wait();
                 expect(await owner.getBalance()).to.be.equal(
                     snapshotOwnerBalance.add(snapshotDropBalance).sub(res.cumulativeGasUsed.mul(res.effectiveGasPrice))
                 );
@@ -257,15 +291,13 @@ describe('Store', () => {
 
             it('should emit event on withdraw', async () => {
                 const snapshotDropBalance = await ethers.provider.getBalance(Drop.address);
-
-                const res = await Store.withdraw(DEFAULT_DROP_ID);
-
-                expect(res).to.emit(Drop, 'Withdrawn').withArgs(snapshotDropBalance);
+                const res = await Store.withdraw(dropId);
+                await expect(res).to.emit(Store, 'Withdrawn').withArgs(dropId, snapshotDropBalance);
             });
 
             context('permission', () => {
                 it('should revert when not allowed to withdraw', async () => {
-                    await expect(Store.connect(user).withdraw(DEFAULT_DROP_ID)).to.revertedWith(
+                    await expect(Store.connect(user).withdraw(dropId)).to.revertedWith(
                         'Ownable: caller is not the owner'
                     );
                 });
@@ -274,23 +306,27 @@ describe('Store', () => {
     });
 
     describe('drip', () => {
+        let dropId: BigNumber;
+
         before(async () => {
             Store = await Contracts.Store.deploy();
+        });
 
-            await Store.createDrop(DEFAULT_DROP_MAX_SUPPLY, DEFAULT_DROP_PRICE, DEFAULT_DROP_VERSIONS);
+        beforeEach(async () => {
+            ({ dropId } = await createDrop({}));
         });
 
         describe('management', () => {
             it('should revert when accessing non existing drip', async () => {
-                await expect(Store.dripInfo(DEFAULT_DROP_ID, 0)).to.be.reverted; // InvalidDripId
-                await expect(Store.dripInfo(DEFAULT_DROP_ID, 1)).to.be.reverted; // InvalidDripId
-                await expect(Store.dripInfo(DEFAULT_DROP_ID, 10)).to.be.reverted; // InvalidDripId
+                await expect(Store.dripInfo(dropId, 0)).to.be.reverted; // InvalidDripId
+                await expect(Store.dripInfo(dropId, 1)).to.be.reverted; // InvalidDripId
+                await expect(Store.dripInfo(dropId, 10)).to.be.reverted; // InvalidDripId
             });
 
             it('should properly retrieve a minted drip', async () => {
-                await Store.mint(DEFAULT_DROP_ID, DEFAULT_DRIP_VERSION, { value: DEFAULT_DROP_PRICE });
+                await Store.mint(dropId, DEFAULT_DRIP_VERSION, { value: DEFAULT_DROP_PRICE });
 
-                const drip = await Store.dripInfo(DEFAULT_DROP_ID, DEFAULT_DRIP_ID);
+                const drip = await Store.dripInfo(dropId, DEFAULT_DRIP_ID);
 
                 expect(drip.id).equal(DEFAULT_DRIP_ID);
                 expect(drip.owner).equal(owner.address);
@@ -304,8 +340,7 @@ describe('Store', () => {
 
         describe('mint', () => {
             let Drop: Drop;
-
-            let dropId = 0;
+            let dropId: BigNumber;
 
             before(async () => {
                 Store = await Contracts.Store.deploy();
@@ -354,134 +389,129 @@ describe('Store', () => {
             };
 
             for (const maxSupply of [3, 5]) {
-                for (const price of [toEth('0'), toEth('0.05'), toEth('2.5')]) {
+                for (const price of [toEth('0.25'), toEth('1'), toEth('10')]) {
                     for (const versions of [5, 10]) {
                         context(`with price: ${price}, maxSupply: ${maxSupply}, versions: ${versions}`, () => {
                             before(async () => {
-                                await Store.createDrop(maxSupply, price, versions);
-                                Drop = (await Contracts.Drop.attach(await Store.drop(dropId))).connect(user);
+                                ({ Drop, dropId } = await createDrop({ maxSupply, price, versions }));
+                                Drop = Drop.connect(user);
                             });
 
                             for (let dripId = 0; dripId < maxSupply; dripId++) {
-                                mint(dripId, 0, price);
+                                mint(dripId, Math.floor(Math.random() * versions), price);
                             }
 
                             it(`should revert when max supply has been reached`, async () => {
-                                await expect(Store.mint(dropId, 0)).to.be.revertedWithCustomError(
+                                await expect(Store.mint(dropId, 0, { value: price })).to.be.revertedWithCustomError(
                                     Drop,
                                     MaxSupplyReached
                                 );
                             });
 
-                            after(() => {
-                                dropId++;
+                            it(`should revert when price is invalid`, async () => {
+                                await expect(Store.mint(dropId, 0, { value: price })).to.be.revertedWithCustomError(
+                                    Drop,
+                                    MaxSupplyReached
+                                );
                             });
                         });
                     }
                 }
             }
 
-            describe('mint errors', () => {
-                beforeEach(async () => {
-                    Store = await Contracts.Store.deploy();
-                });
+            it('minting with an invalid version should revert', async () => {
+                ({ Drop, dropId } = await createDrop({ versions: 5 }));
 
-                it('minting with an invalid version should revert', async () => {
-                    await Store.createDrop(DEFAULT_DROP_MAX_SUPPLY, 0, 5);
-                    Drop = (await Contracts.Drop.attach(await Store.drop(DEFAULT_DROP_ID))).connect(user);
+                await Store.mint(dropId, 0, { value: DEFAULT_DROP_PRICE });
+                await Store.mint(dropId, 1, { value: DEFAULT_DROP_PRICE });
+                await Store.mint(dropId, 2, { value: DEFAULT_DROP_PRICE });
+                await Store.mint(dropId, 3, { value: DEFAULT_DROP_PRICE });
+                await Store.mint(dropId, 4, { value: DEFAULT_DROP_PRICE });
 
-                    await Store.mint(DEFAULT_DROP_ID, 0);
-                    await Store.mint(DEFAULT_DROP_ID, 1);
-                    await Store.mint(DEFAULT_DROP_ID, 2);
-                    await Store.mint(DEFAULT_DROP_ID, 3);
-                    await Store.mint(DEFAULT_DROP_ID, 4);
+                await expect(Store.mint(dropId, 5)).revertedWithCustomError(Drop, InvalidVersionId);
+            });
 
-                    await expect(Store.mint(DEFAULT_DROP_ID, 5)).revertedWithCustomError(Drop, InvalidVersionId);
-                });
+            it('minting with an invalid value should revert', async () => {
+                ({ Drop, dropId } = await createDrop({}));
 
-                it('minting with an invalid value should revert', async () => {
-                    await Store.createDrop(100, toEth('1'), 5);
-                    Drop = (await Contracts.Drop.attach(await Store.drop(DEFAULT_DROP_ID))).connect(user);
+                Drop = (await Contracts.Drop.attach(await Store.drop(DEFAULT_DROP_ID))).connect(user);
 
-                    await expect(Store.mint(DEFAULT_DROP_ID, DEFAULT_DRIP_VERSION)).revertedWithCustomError(
-                        Drop,
-                        InvalidPrice
-                    );
-                });
+                await expect(Store.mint(dropId, DEFAULT_DRIP_VERSION)).revertedWithCustomError(Drop, InvalidPrice);
             });
         });
 
         describe('mutate', () => {
             let Drop: Drop;
+            let dropId: BigNumber;
 
             let tokenMutating: TestERC721;
 
+            before(async () => {
+                Store = await Contracts.Store.deploy();
+            });
+
             describe('basic checks', () => {
                 beforeEach(async () => {
-                    Store = await Contracts.Store.deploy();
-
-                    await Store.createDrop(DEFAULT_DROP_MAX_SUPPLY, DEFAULT_DROP_PRICE, DEFAULT_DROP_VERSIONS);
+                    ({ Drop, dropId } = await createDrop({}));
 
                     Store = Store.connect(user);
-                    Drop = await Contracts.Drop.attach(await Store.drop(DEFAULT_DROP_ID));
                     tokenMutating = (await Contracts.TestERC721.deploy()).connect(user);
 
                     await tokenMutating.mint();
-                    await Store.mint(DEFAULT_DROP_ID, DEFAULT_DRIP_VERSION, { value: DEFAULT_DROP_PRICE });
+                    await Store.mint(dropId, DEFAULT_DRIP_VERSION, { value: DEFAULT_DROP_PRICE });
                 });
 
                 it("should revert if drip doesn't exist", async () => {
-                    await expect(Store.mutate(DEFAULT_DROP_ID, 1, tokenMutating.address, 0)).to.revertedWithCustomError(
+                    await expect(Store.mutate(dropId, 1, tokenMutating.address, 0)).to.revertedWithCustomError(
                         Drop,
                         InvalidDripOwner
                     );
                 });
 
                 it("should revert if user doesn't own the drip", async () => {
-                    await Store.connect(owner).mint(DEFAULT_DROP_ID, DEFAULT_DRIP_VERSION, {
+                    await Store.connect(owner).mint(dropId, DEFAULT_DRIP_VERSION, {
                         value: DEFAULT_DROP_PRICE
                     });
 
-                    await expect(
-                        Store.mutate(DEFAULT_DROP_ID, 1, tokenMutating.address, 0)
-                    ).to.be.revertedWithCustomError(Drop, InvalidDripOwner);
+                    await expect(Store.mutate(dropId, 1, tokenMutating.address, 0)).to.be.revertedWithCustomError(
+                        Drop,
+                        InvalidDripOwner
+                    );
                 });
 
                 it('should revert if already mutated', async () => {
-                    await Store.mutate(DEFAULT_DROP_ID, 0, tokenMutating.address, 0);
-                    await expect(
-                        Store.mutate(DEFAULT_DROP_ID, 0, tokenMutating.address, 0)
-                    ).to.be.revertedWithCustomError(Drop, AlreadyMutated);
+                    await Store.mutate(dropId, 0, tokenMutating.address, 0);
+                    await expect(Store.mutate(dropId, 0, tokenMutating.address, 0)).to.be.revertedWithCustomError(
+                        Drop,
+                        AlreadyMutated
+                    );
                 });
             });
 
             describe('ERC721 token', () => {
                 beforeEach(async () => {
-                    Store = await Contracts.Store.deploy();
+                    ({ Drop, dropId } = await createDrop({}));
 
-                    tokenMutating = (await Contracts.TestERC721.deploy()).connect(user);
-                    await Store.createDrop(DEFAULT_DROP_MAX_SUPPLY, DEFAULT_DROP_PRICE, DEFAULT_DROP_VERSIONS);
                     Store = Store.connect(user);
-
-                    Drop = await Contracts.Drop.attach(await Store.drop(DEFAULT_DROP_ID));
+                    tokenMutating = (await Contracts.TestERC721.deploy()).connect(user);
 
                     await tokenMutating.mint();
-                    await Store.mint(DEFAULT_DROP_ID, DEFAULT_DRIP_VERSION, { value: DEFAULT_DROP_PRICE });
+                    await Store.mint(dropId, DEFAULT_DRIP_VERSION, { value: DEFAULT_DROP_PRICE });
                 });
 
                 it("should revert if user doesn't own the nft", async () => {
                     await tokenMutating.transferFrom(user.address, owner.address, 0);
 
-                    await expect(Store.mutate(DEFAULT_DROP_ID, 0, tokenMutating.address, 0)).to.revertedWithCustomError(
+                    await expect(Store.mutate(dropId, 0, tokenMutating.address, 0)).to.revertedWithCustomError(
                         Drop,
                         InvalidTokenOwner
                     );
                 });
 
                 it('should mutate', async () => {
-                    await Store.mutate(DEFAULT_DROP_ID, 0, tokenMutating.address, 0);
+                    await Store.mutate(dropId, 0, tokenMutating.address, 0);
 
-                    const drip = await Store.dripInfo(DEFAULT_DROP_ID, 0);
+                    const drip = await Store.dripInfo(dropId, 0);
 
                     expect(drip.drip.status).to.equal(DripStatus.MUTATED);
                     expect(drip.drip.mutation.tokenContract).to.equal(tokenMutating.address);
