@@ -7,7 +7,6 @@ import { ERC721Enumerable } from "@openzeppelin/contracts/token/ERC721/extension
 import { IERC721 } from "@openzeppelin/contracts/interfaces/IERC721.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 /**
  * @dev A struct representing the status of a Drip.
@@ -70,7 +69,7 @@ struct DripInfo {
 }
 
 /**
- * @author Maxime Aubanel - @sshmaxime
+ * @author premierstudio.xyz
  *
  * @title Drop
  */
@@ -92,14 +91,14 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     // The id of the Drop
     uint256 private immutable DROP_ID;
 
-    // The maximum supply of the Drop
+    // The maximum supply of the Drop, it cannot be 0
     uint256 private immutable MAX_SUPPLY;
 
     // The price to mint the Drip
     uint256 private immutable PRICE;
 
-    // The number of versions
-    uint8 private immutable VERSIONS; // starts at version 1, cannot be 0
+    // The number of versions, it cannot be 0
+    uint8 private immutable VERSIONS;
 
     // Mappings
 
@@ -119,8 +118,6 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     error InvalidTokenOwner();
 
     error MaxSupplyReached();
-
-    error UnsupportedTokenContract();
 
     constructor(
         uint256 id,
@@ -167,7 +164,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     /**
      * @dev Returns the Drip matching the Drip id.
      */
-    function dripInfo(uint256 dripId) public view returns (DripInfo memory) {
+    function dripInfo(uint256 dripId) external view returns (DripInfo memory) {
         Drip memory _drip = dripIdToDrip[dripId];
 
         if (dripId >= totalSupply()) {
@@ -257,7 +254,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     /**
      * @dev Mint a Drip.
      */
-    function mint(uint8 versionId, address caller) external payable nonReentrant onlyOwner returns (uint256 dripId) {
+    function mint(uint8 versionId, address caller) external payable onlyOwner returns (uint256 dripId) {
         dripId = totalSupply();
 
         // Drip id to be minted needs to be below the max supply limit
@@ -286,12 +283,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     /**
      * @dev Mutate a Drip.
      */
-    function mutate(
-        uint256 dripId,
-        IERC721 tokenContract,
-        uint256 tokenId,
-        address caller
-    ) external nonReentrant onlyOwner {
+    function mutate(uint256 dripId, IERC721 tokenContract, uint256 tokenId, address caller) external onlyOwner {
         Drip storage _drip = dripIdToDrip[dripId];
 
         // Caller should own the Drip
@@ -317,7 +309,7 @@ contract Drop is ERC721Enumerable, Ownable, ReentrancyGuard {
     /**
      * @dev Withdraw funds.
      */
-    function withdraw(address to) public onlyOwner returns (uint256 balance) {
+    function withdraw(address to) external onlyOwner returns (uint256 balance) {
         balance = address(this).balance;
         payable(to).transfer(balance);
     }

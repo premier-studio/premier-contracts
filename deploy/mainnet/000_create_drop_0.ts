@@ -2,8 +2,7 @@ import { ethers } from 'hardhat';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { STORE } from '@premier-deploy/_default/000_deploy_store';
-import { publishDropMetadataToIPFS } from '@premier-scripts';
+import { STORE } from '@premier-deploy/_common/000_deploy_store';
 
 const { parseEther: toEth } = ethers.utils;
 
@@ -23,12 +22,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             autoMine: true
         },
         'createDrop',
-        10,
-        toEth('0.01'),
-        5
+        250,
+        toEth('0.25'),
+        6
     );
 
-    const IPFS_URL = await publishDropMetadataToIPFS(0);
+    const IPFS_URL = 'ipfs://QmdaxiUTUZyThFCRCNY9H3BCeRpiVh6KDwKbSsY5pp6TFX';
 
     await execute(
         STORE,

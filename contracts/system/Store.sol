@@ -2,15 +2,13 @@
 pragma solidity 0.8.18;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { ERC721Enumerable } from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import { IERC721 } from "@openzeppelin/contracts/interfaces/IERC721.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 import { Drop, Drip, DripInfo, DropInfo, DripStatus } from "./Drop.sol";
 
 /**
- * @author Maxime Aubanel - @sshmaxime
+ * @author premierstudio.xyz
  *
  * @title Store
  */
@@ -62,48 +60,48 @@ contract Store is ReentrancyGuard, Ownable {
     /**
      * @dev Returns the Drop info matching the drop id.
      */
-    function dropInfo(uint256 dropId) public view returns (DropInfo memory) {
+    function dropInfo(uint256 dropId) external view returns (DropInfo memory) {
         return drop(dropId).dropInfo();
     }
 
     /**
      * @dev Returns the Drip info matching the drop id and drip id.
      */
-    function dripInfo(uint256 dropId, uint256 dripId) public view returns (DripInfo memory) {
+    function dripInfo(uint256 dropId, uint256 dripId) external view returns (DripInfo memory) {
         return drop(dropId).dripInfo(dripId);
     }
 
     /**
      * @dev Set the contractURI of a Drop.
      */
-    function setContractURI(uint256 dropId, string memory newURI) public onlyOwner {
+    function setContractURI(uint256 dropId, string memory newURI) external onlyOwner {
         drop(dropId).setContractURI(newURI);
     }
 
     /**
      * @dev Set the dropURI of a DROP.
      */
-    function setDropURI(uint256 dropId, string memory newURI) public onlyOwner {
+    function setDropURI(uint256 dropId, string memory newURI) external onlyOwner {
         drop(dropId).setDropURI(newURI);
     }
 
     /**
      * @dev Set the baseURI of a Drop.
      */
-    function setBaseURI(uint256 dropId, string memory newURI) public onlyOwner {
+    function setBaseURI(uint256 dropId, string memory newURI) external onlyOwner {
         drop(dropId).setBaseURI(newURI);
     }
 
     /**
      * @dev Create a Drop.
      */
-    function createDrop(uint256 maxSupply, uint256 mintPrice, uint8 versions) public onlyOwner {
-        uint256 dropIdToCreate = dropSupply();
-        dropIdToDrop[dropIdToCreate] = new Drop(dropIdToCreate, maxSupply, mintPrice, versions);
+    function createDrop(uint256 maxSupply, uint256 mintPrice, uint8 versions) external onlyOwner {
+        uint256 dropId = dropSupply();
+        dropIdToDrop[dropId] = new Drop(dropId, maxSupply, mintPrice, versions);
 
         DROP_SUPPLY++;
 
-        emit DropCreated(dropIdToCreate);
+        emit DropCreated(dropId);
     }
 
     /**
@@ -127,7 +125,7 @@ contract Store is ReentrancyGuard, Ownable {
     /**
      * @dev Withdraw funds from Drop.
      */
-    function withdraw(uint256 dropId) public onlyOwner {
+    function withdraw(uint256 dropId) external onlyOwner {
         uint256 balance = drop(dropId).withdraw(msg.sender);
 
         emit Withdrawn(dropId, balance);

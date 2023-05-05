@@ -18,12 +18,17 @@ import { HardhatUserConfig } from 'hardhat/config';
 import { HardhatNetworkForkingUserConfig } from 'hardhat/types';
 
 // Paths
-const DEFAULT_DEPLOY_DIR = './deploy/_default/';
-const DEFAULT_SETUP_TEST_DIR = './deploy/_setup/';
+const COMMON_DEPLOY_DIR = './deploy/_common/';
+const HARDHAT_DEPLOY_DIR = './deploy/hardhat/';
+const GOERLI_DEPLOY_DIR = './deploy/goerli/';
+const SEPOLIA_DEPLOY_DIR = './deploy/sepolia/';
+//
+const MAINNET_DEPLOY_DIR = './deploy/mainnet/';
 
 enum Networks {
-    MAINNET = 'MAINNET',
     GOERLI = 'GOERLI',
+    SEPOLIA = 'SEPOLIA',
+    MAINNET = 'MAINNET',
     //
     NONE = 'NONE'
 }
@@ -52,7 +57,17 @@ const {
 
 const forkConfig: HardhatNetworkForkingUserConfig | undefined = (() => {
     if (FORK === undefined || FORK === Networks.NONE) return undefined;
-    const url = FORK === Networks.MAINNET ? MAINNET_ENDPOINT : FORK === Networks.GOERLI ? GOERLI_ENDPOINT : '';
+    const url =
+        FORK === Networks.MAINNET
+            ? MAINNET_ENDPOINT
+            : FORK === Networks.GOERLI
+            ? GOERLI_ENDPOINT
+            : FORK === Networks.SEPOLIA
+            ? SEPOLIA_ENDPOINT
+            : undefined;
+
+    if (!url) throw Error('Fork URL is undefined');
+
     console.log('Forking network [', FORK, '], block number [', FORK_BN, ']');
     return { url, blockNumber: Number(FORK_BN) };
 })();
@@ -76,28 +91,25 @@ const config: HardhatUserConfig = {
                       ]
                     : undefined,
             allowUnlimitedContractSize: true,
-            deploy: [DEFAULT_DEPLOY_DIR, DEFAULT_SETUP_TEST_DIR]
+            deploy: [COMMON_DEPLOY_DIR, HARDHAT_DEPLOY_DIR]
         },
-        localhost: {
-            deploy: [DEFAULT_DEPLOY_DIR]
-        },
-        mainnet: {
-            url: MAINNET_ENDPOINT,
-            deploy: [DEFAULT_DEPLOY_DIR, './deploy/mainnet']
-        },
+
         goerli: {
             url: GOERLI_ENDPOINT,
             chainId: 5,
-            deploy: [DEFAULT_DEPLOY_DIR, './deploy/goerli'],
-            accounts: HARDHAT_DEPLOYER ? [HARDHAT_DEPLOYER] : undefined,
+            deploy: [COMMON_DEPLOY_DIR, GOERLI_DEPLOY_DIR],
             gasPrice: 9000000000 // 9 Gwei
         },
         sepolia: {
             url: SEPOLIA_ENDPOINT,
             chainId: 11155111,
-            deploy: [DEFAULT_DEPLOY_DIR, './deploy/sepolia'],
-            accounts: HARDHAT_DEPLOYER ? [HARDHAT_DEPLOYER] : undefined,
+            deploy: [COMMON_DEPLOY_DIR, SEPOLIA_DEPLOY_DIR],
             gasPrice: 2000000000 // 2 Gwei
+        },
+        mainnet: {
+            url: MAINNET_ENDPOINT,
+            chainId: 1,
+            deploy: [COMMON_DEPLOY_DIR, MAINNET_DEPLOY_DIR]
         }
     },
 
@@ -106,8 +118,17 @@ const config: HardhatUserConfig = {
     },
 
     namedAccounts: {
-        deployer: 0,
-        user: 1
+        deployer: {
+            1337: 0,
+            //
+            1: "ledger://m/44'/60'/0'/3:0xf6Fc97De0dC943D3cEeEDD88C32bfea76A2d7AA1",
+            5: "ledger://m/44'/60'/0'/3:0xf6Fc97De0dC943D3cEeEDD88C32bfea76A2d7AA1",
+            11155111: "ledger://m/44'/60'/0'/3:0xf6Fc97De0dC943D3cEeEDD88C32bfea76A2d7AA1"
+        },
+        user: {
+            1337: 1
+            //
+        }
     },
 
     solidity: {

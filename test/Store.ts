@@ -200,7 +200,7 @@ describe('Store', () => {
         });
 
         describe('URIs', () => {
-            const newURI = 'https://google.com';
+            const newURI = 'https://google.com/';
 
             let dropId: BigNumber;
 
@@ -240,11 +240,13 @@ describe('Store', () => {
                 });
             });
 
-            context('dropURI', () => {
+            context('baseURI', () => {
                 it('Owner: should be able to change baseURI', async () => {
                     expect((await Store.dropInfo(dropId)).baseURI).to.equal('');
                     await Store.setBaseURI(dropId, newURI);
                     expect((await Store.dropInfo(dropId)).baseURI).to.equal(newURI);
+
+                    await Store.mint(dropId, 0, { value: DEFAULT_DROP_PRICE });
                 });
 
                 context('permission', () => {
@@ -422,13 +424,25 @@ describe('Store', () => {
             it('minting with an invalid version should revert', async () => {
                 ({ Drop, dropId } = await createDrop({ versions: 5 }));
 
-                await Store.mint(dropId, 0, { value: DEFAULT_DROP_PRICE });
-                await Store.mint(dropId, 1, { value: DEFAULT_DROP_PRICE });
-                await Store.mint(dropId, 2, { value: DEFAULT_DROP_PRICE });
-                await Store.mint(dropId, 3, { value: DEFAULT_DROP_PRICE });
-                await Store.mint(dropId, 4, { value: DEFAULT_DROP_PRICE });
+                await expect(Store.mint(dropId, 0, { value: DEFAULT_DROP_PRICE })).to.not.reverted;
+                await expect(Store.mint(dropId, 1, { value: DEFAULT_DROP_PRICE })).to.not.reverted;
+                await expect(Store.mint(dropId, 2, { value: DEFAULT_DROP_PRICE })).to.not.reverted;
+                await expect(Store.mint(dropId, 3, { value: DEFAULT_DROP_PRICE })).to.not.reverted;
+                await expect(Store.mint(dropId, 4, { value: DEFAULT_DROP_PRICE })).to.not.reverted;
 
-                await expect(Store.mint(dropId, 5)).revertedWithCustomError(Drop, InvalidVersionId);
+                await expect(Store.mint(dropId, 5, { value: DEFAULT_DROP_PRICE })).revertedWithCustomError(
+                    Drop,
+                    InvalidVersionId
+                );
+
+                ({ Drop, dropId } = await createDrop({ versions: 1 }));
+
+                await expect(Store.mint(dropId, 0, { value: DEFAULT_DROP_PRICE })).to.not.reverted;
+
+                await expect(Store.mint(dropId, 1, { value: DEFAULT_DROP_PRICE })).revertedWithCustomError(
+                    Drop,
+                    InvalidVersionId
+                );
             });
 
             it('minting with an invalid value should revert', async () => {
@@ -437,6 +451,14 @@ describe('Store', () => {
                 Drop = (await Contracts.Drop.attach(await Store.drop(DEFAULT_DROP_ID))).connect(user);
 
                 await expect(Store.mint(dropId, DEFAULT_DRIP_VERSION)).revertedWithCustomError(Drop, InvalidPrice);
+                await expect(Store.mint(dropId, DEFAULT_DRIP_VERSION, { value: toEth('0') })).revertedWithCustomError(
+                    Drop,
+                    InvalidPrice
+                );
+                await expect(Store.mint(dropId, DEFAULT_DRIP_VERSION, { value: toEth('234') })).revertedWithCustomError(
+                    Drop,
+                    InvalidPrice
+                );
             });
         });
 
@@ -456,62 +478,63 @@ describe('Store', () => {
 
                     Store = Store.connect(user);
                     tokenMutating = (await Contracts.TestERC721.deploy()).connect(user);
-
-                    await tokenMutating.mint();
-                    await Store.mint(dropId, DEFAULT_DRIP_VERSION, { value: DEFAULT_DROP_PRICE });
                 });
 
                 it("should revert if drip doesn't exist", async () => {
-                    await expect(Store.mutate(dropId, 1, tokenMutating.address, 0)).to.revertedWithCustomError(
+                    await tokenMutating.mint();
+
+                    await expect(Store.mutate(dropId, 0, tokenMutating.address, 0)).to.revertedWithCustomError(
                         Drop,
                         InvalidDripOwner
                     );
                 });
 
                 it("should revert if user doesn't own the drip", async () => {
+                    await tokenMutating.mint();
                     await Store.connect(owner).mint(dropId, DEFAULT_DRIP_VERSION, {
                         value: DEFAULT_DROP_PRICE
                     });
 
-                    await expect(Store.mutate(dropId, 1, tokenMutating.address, 0)).to.be.revertedWithCustomError(
-                        Drop,
-                        InvalidDripOwner
-                    );
+                    await expect(
+                        Store.mutate(dropId, DEFAULT_DRIP_ID, tokenMutating.address, 0)
+                    ).to.be.revertedWithCustomError(Drop, InvalidDripOwner);
+                });
+
+                it("should revert if user doesn't own the nft", async () => {
+                    await tokenMutating.connect(owner).mint();
+                    await Store.mint(dropId, DEFAULT_DRIP_VERSION, {
+                        value: DEFAULT_DROP_PRICE
+                    });
+
+                    await expect(
+                        Store.mutate(dropId, DEFAULT_DRIP_ID, tokenMutating.address, 0)
+                    ).to.revertedWithCustomError(Drop, InvalidTokenOwner);
                 });
 
                 it('should revert if already mutated', async () => {
-                    await Store.mutate(dropId, 0, tokenMutating.address, 0);
+                    await tokenMutating.mint();
+                    await Store.mint(dropId, DEFAULT_DRIP_VERSION, {
+                        value: DEFAULT_DROP_PRICE
+                    });
+
+                    await Store.mutate(dropId, DEFAULT_DRIP_ID, tokenMutating.address, 0);
                     await expect(Store.mutate(dropId, 0, tokenMutating.address, 0)).to.be.revertedWithCustomError(
                         Drop,
                         AlreadyMutated
                     );
                 });
-            });
-
-            describe('ERC721 token', () => {
-                beforeEach(async () => {
-                    ({ Drop, dropId } = await createDrop({}));
-
-                    Store = Store.connect(user);
-                    tokenMutating = (await Contracts.TestERC721.deploy()).connect(user);
-
-                    await tokenMutating.mint();
-                    await Store.mint(dropId, DEFAULT_DRIP_VERSION, { value: DEFAULT_DROP_PRICE });
-                });
-
-                it("should revert if user doesn't own the nft", async () => {
-                    await tokenMutating.transferFrom(user.address, owner.address, 0);
-
-                    await expect(Store.mutate(dropId, 0, tokenMutating.address, 0)).to.revertedWithCustomError(
-                        Drop,
-                        InvalidTokenOwner
-                    );
-                });
 
                 it('should mutate', async () => {
-                    await Store.mutate(dropId, 0, tokenMutating.address, 0);
+                    await tokenMutating.mint();
+                    await Store.mint(dropId, DEFAULT_DRIP_VERSION, {
+                        value: DEFAULT_DROP_PRICE
+                    });
 
-                    const drip = await Store.dripInfo(dropId, 0);
+                    const tx = await Store.mutate(dropId, DEFAULT_DRIP_ID, tokenMutating.address, 0);
+
+                    await expect(tx).to.emit(Store, 'Mutated').withArgs(dropId, DEFAULT_DRIP_ID);
+
+                    const drip = await Store.dripInfo(dropId, DEFAULT_DRIP_ID);
 
                     expect(drip.drip.status).to.equal(DripStatus.MUTATED);
                     expect(drip.drip.mutation.tokenContract).to.equal(tokenMutating.address);
